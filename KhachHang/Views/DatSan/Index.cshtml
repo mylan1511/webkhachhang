@@ -1,0 +1,529 @@
+﻿@model KhachHang.Models.FieldDto
+
+@{
+    ViewBag.Title = $"Đặt sân - {Model.Name}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool isLoggedIn = Context.Session.GetInt32("UserId") != null;
+
+    var services =
+        ViewBag.Services as List<KhachHang.Models.ServiceDto>;
+
+    var schedules =
+        ViewBag.AvailableSchedules as List<KhachHang.Models.FieldScheduleDto>
+        ?? new List<KhachHang.Models.FieldScheduleDto>();
+}
+@functions {
+    public string GetImageUrl(string? imageUrl, string defaultImage)
+    {
+        const string apiHost = "http://klcnhost-001-site1.ntempurl.com";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return defaultImage;
+
+        string fullUrl;
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+        {
+            fullUrl = imageUrl;
+        }
+        else
+        {
+            if (!imageUrl.StartsWith("/"))
+                imageUrl = "/" + imageUrl;
+
+            fullUrl = apiHost + imageUrl;
+        }
+
+        return "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullUrl);
+    }
+}
+<main class="min-h-screen bg-surface">
+
+    <section class="relative h-[320px] md:h-[420px] rounded-3xl overflow-hidden shadow-xl mb-8">
+
+        <img src="@GetImageUrl(Model.ImageUrl, "/images/default-field.jpg")"
+             class="absolute inset-0 w-full h-full object-cover object-center"
+             alt="@Model.Name"
+             onerror="this.onerror=null;this.src='/images/default-field.jpg';" />
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+
+            <div class="flex flex-wrap gap-3 mb-4">
+
+                <span class="inline-flex items-center gap-2 bg-primary px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-base">
+                        sports_soccer
+                    </span>
+
+                    @(Model.FieldType ?? "Sân bóng")
+                </span>
+
+                <span class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-base">
+                        verified
+                    </span>
+
+                    @(Model.Status ?? "Không rõ")
+                </span>
+            </div>
+
+            <h1 class="font-headline text-3xl md:text-5xl font-extrabold tracking-tight mb-3">
+                @Model.Name
+            </h1>
+
+            <p class="max-w-3xl text-white/85 text-base md:text-lg leading-relaxed line-clamp-2">
+                @(Model.Description ?? "Sân bóng chất lượng cao, phù hợp thi đấu và luyện tập.")
+            </p>
+        </div>
+    </section>
+
+    <section class="max-w-screen-2xl mx-auto px-6 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div class="lg:col-span-8 space-y-10">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                        Giá thường
+                    </p>
+                    <p class="text-3xl font-headline font-extrabold text-primary">
+                        @Model.BasePrice.ToString("N0")đ
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                        Giá cao điểm
+                    </p>
+                    <p class="text-3xl font-headline font-extrabold text-orange-600">
+                        @Model.PeakPrice.ToString("N0")đ
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                        Đánh giá
+                    </p>
+                    <p class="text-3xl font-headline font-extrabold text-yellow-600">
+                        @(Model.AvgRating?.ToString("0.0") ?? "0.0")
+                        <span class="text-base text-on-surface-variant font-medium">/5</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                            Chọn lịch
+                        </p>
+                        <h2 class="text-3xl font-headline font-extrabold">
+                            Lịch đặt sân
+                        </h2>
+                    </div>
+
+                    <p class="text-sm text-on-surface-variant">
+                        Chọn một hoặc nhiều khung giờ trống
+                    </p>
+                </div>
+
+                <div class="flex gap-3 mb-8 overflow-x-auto pb-3">
+                    @for (int i = 0; i < 7; i++)
+                    {
+                        var date = DateTime.Today.AddDays(i);
+
+                        <button onclick="selectDate(this)"
+                                data-date="@date.ToString("yyyy-MM-dd")"
+                                class="date-btn min-w-[130px] px-5 py-4 rounded-2xl whitespace-nowrap transition-all border-2 font-bold @(i == 0 ? "bg-primary text-white border-primary shadow-lg" : "bg-white border-gray-200 hover:border-primary hover:text-primary")">
+                            <span class="block text-sm">@date.ToString("ddd")</span>
+                            <span class="block text-lg">@date.ToString("dd/MM")</span>
+                        </button>
+                    }
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+                     id="slotContainer">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+
+                <div class="mb-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        Tiện ích
+                    </p>
+
+                    <h2 class="text-3xl font-headline font-extrabold">
+                        Dịch vụ đi kèm
+                    </h2>
+                </div>
+
+                @if (services != null && services.Any())
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach (var service in services)
+                        {
+                            <div class="border border-gray-100 rounded-3xl p-5 bg-surface-container-lowest hover:shadow-md transition-all">
+
+                                <div class="flex gap-4">
+                                    <img src="@GetImageUrl(service.ImageUrl, "/lib/anhbanh.png")"
+                                         class="w-28 h-28 object-cover rounded-3xl shadow-sm"
+                                         alt="@service.Name"
+                                         onerror="this.onerror=null;this.src='/lib/anhbanh.png';" />
+
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-xl">
+                                            @service.Name
+                                        </h3>
+
+                                        <p class="text-gray-500 text-sm mt-2 line-clamp-2">
+                                            @service.Description
+                                        </p>
+
+                                        <p class="text-primary font-extrabold text-lg mt-3">
+                                            @service.Price.ToString("N0")đ
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 flex justify-end items-center gap-2">
+
+                                    <button type="button"
+                                            onclick="changeQty(@service.ServiceId, -1)"
+                                            class="w-9 h-9 rounded-full bg-white border hover:border-primary">
+                                        -
+                                    </button>
+
+                                    <input type="number"
+                                           min="0"
+                                           value="0"
+                                           id="service-@service.ServiceId"
+                                           data-price="@service.Price"
+                                           class="service-qty w-16 text-center border rounded-xl py-2"
+                                           onchange="updateTotal()" />
+
+                                    <button type="button"
+                                            onclick="changeQty(@service.ServiceId, 1)"
+                                            class="w-9 h-9 rounded-full bg-primary text-white">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-on-surface-variant bg-surface-container rounded-2xl p-8">
+                        Hiện chưa có dịch vụ đi kèm.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <aside class="lg:col-span-4">
+            <div class="sticky top-24 space-y-6">
+
+                <div class="bg-primary text-white p-8 rounded-3xl shadow-lg">
+                    <h3 class="font-headline font-extrabold text-xl mb-6">
+                        THÔNG TIN ĐẶT SÂN
+                    </h3>
+
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between">
+                            <span>Tiền cọc yêu cầu</span>
+                            <span class="font-bold">20%</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span>Hủy sân</span>
+                            <span class="font-bold">Trước 2 giờ</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span>Giữ chỗ</span>
+                            <span class="font-bold">Khi xác nhận</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 bg-white/10 rounded-2xl p-4 text-sm leading-7">
+                        • Chọn khung giờ và dịch vụ <br />
+                        • Sang bước xác nhận đặt sân <br />
+                        • Hệ thống giữ chỗ rồi tạo đơn <br />
+                        • Thanh toán cọc ở bước tiếp theo
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+
+                    <h3 class="font-headline font-extrabold text-2xl mb-6">
+                        Tạm tính
+                    </h3>
+
+                    <div class="space-y-4">
+
+                        <div class="flex justify-between text-lg">
+                            <span>Tổng tiền sân</span>
+                            <span id="totalPrice" class="font-bold text-primary">0đ</span>
+                        </div>
+
+                        <div class="flex justify-between text-lg">
+                            <span>Dịch vụ</span>
+                            <span id="serviceTotal" class="font-bold text-orange-600">0đ</span>
+                        </div>
+
+                        <hr />
+
+                        <div class="flex justify-between text-xl">
+                            <span class="font-bold">Tổng thanh toán</span>
+                            <span id="grandTotal" class="font-extrabold text-emerald-600">0đ</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tiền cọc 20%</span>
+                            <span id="depositPrice" class="font-semibold text-emerald-600">0đ</span>
+                        </div>
+
+                        <button onclick="addToPending()"
+                                id="btnProceed"
+                                class="mt-6 w-full py-5 bg-primary text-white rounded-2xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700 transition-all"
+                                disabled>
+                            @(isLoggedIn ? "TIẾP TỤC ĐẶT SÂN" : "ĐĂNG NHẬP ĐỂ TIẾP TỤC")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        let allSchedules = @Html.Raw(Json.Serialize(schedules));
+        let selectedSlots = [];
+
+        function selectDate(btn) {
+            document.querySelectorAll('.date-btn')
+                .forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white', 'border-primary', 'shadow-lg');
+                    b.classList.add('bg-white');
+                });
+
+            btn.classList.add('bg-primary', 'text-white', 'border-primary', 'shadow-lg');
+            btn.classList.remove('bg-white');
+
+            loadSlotsForDate(btn.dataset.date);
+        }
+
+        function loadSlotsForDate(selectedDate) {
+            const container = document.getElementById('slotContainer');
+
+            container.innerHTML = '';
+            selectedSlots = [];
+            updateTotal();
+
+            const schedule = allSchedules.find(item => {
+                const d = item.slotDate?.toString().split('T')[0];
+                return d === selectedDate;
+            });
+
+            if (!schedule || !schedule.slots || schedule.slots.length === 0) {
+                container.innerHTML =
+                    `<div class="col-span-full text-center text-gray-500 bg-surface-container rounded-2xl p-8">
+                        Không có khung giờ cho ngày này.
+                    </div>`;
+                return;
+            }
+
+            schedule.slots.forEach(slot => {
+                const isAvailable =
+                    slot.statusId === 1 ||
+                    (slot.status || '').toLowerCase().includes('trống');
+
+                const div = document.createElement('div');
+
+                div.className =
+                    `slot-card border-2 rounded-2xl p-5 text-center transition-all
+                    ${isAvailable
+                        ? 'cursor-pointer border-gray-200 hover:border-primary bg-white'
+                        : 'cursor-not-allowed border-red-200 bg-red-50'
+                    }`;
+
+                div.dataset.slotid = slot.fieldSlotId;
+                div.dataset.price = slot.price;
+
+                div.innerHTML = `
+                    <p class="text-xl font-headline font-extrabold">
+                        ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}
+                    </p>
+
+                    <p class="mt-2 font-bold text-primary">
+                        ${Number(slot.price).toLocaleString('vi-VN')}đ
+                    </p>
+
+                    <p class="mt-2 text-xs font-bold uppercase tracking-wide ${isAvailable ? 'text-green-600' : 'text-red-600'}">
+                        ${isAvailable ? 'TRỐNG' : (slot.status || 'KHÔNG TRỐNG')}
+                    </p>
+                `;
+
+                if (isAvailable) {
+                    div.onclick = () =>
+                        toggleSlot(slot.fieldSlotId, slot.price, div);
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+        function formatTime(value) {
+            if (!value) return '';
+
+            const text = value.toString();
+
+            if (text.includes('T')) {
+                const d = new Date(text);
+                return d.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            return text.substring(0, 5);
+        }
+
+        function toggleSlot(slotId, price, element) {
+            if (selectedSlots.includes(slotId)) {
+                selectedSlots = selectedSlots.filter(id => id !== slotId);
+
+                element.classList.remove(
+                    'border-primary',
+                    'bg-primary/5',
+                    'ring-2',
+                    'ring-primary'
+                );
+            }
+            else {
+                selectedSlots.push(slotId);
+
+                element.classList.add(
+                    'border-primary',
+                    'bg-primary/5',
+                    'ring-2',
+                    'ring-primary'
+                );
+            }
+
+            updateTotal();
+        }
+
+        function changeQty(serviceId, amount) {
+            const input = document.getElementById(`service-${serviceId}`);
+
+            let qty = parseInt(input.value || 0);
+            qty += amount;
+
+            if (qty < 0) qty = 0;
+
+            input.value = qty;
+
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let fieldTotal = 0;
+            let serviceTotal = 0;
+
+            document.querySelectorAll('.slot-card.border-primary')
+                .forEach(card => {
+                    fieldTotal += parseFloat(card.dataset.price || 0);
+                });
+
+            document.querySelectorAll('.service-qty')
+                .forEach(input => {
+                    const qty = parseInt(input.value || 0);
+                    const price = parseFloat(input.dataset.price || 0);
+
+                    serviceTotal += qty * price;
+                });
+
+            const grandTotal = fieldTotal + serviceTotal;
+            const deposit = grandTotal * 0.2;
+
+            setText('totalPrice', fieldTotal);
+            setText('serviceTotal', serviceTotal);
+            setText('grandTotal', grandTotal);
+            setText('depositPrice', deposit);
+
+            const btn = document.getElementById('btnProceed');
+
+            if (btn) {
+                btn.disabled = selectedSlots.length === 0;
+            }
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+
+            if (el) {
+                el.textContent =
+                    Number(value).toLocaleString('vi-VN') + 'đ';
+            }
+        }
+
+        function addToPending() {
+            if (selectedSlots.length === 0) {
+                alert("Vui lòng chọn khung giờ");
+                return;
+            }
+
+            const form = document.createElement("form");
+
+            form.method = "POST";
+            form.action = "/DatSan/AddToPending";
+
+            appendHidden(form, "fieldId", "@Model.FieldId");
+
+            selectedSlots.forEach(id => {
+                appendHidden(form, "selectedSlotIds", id);
+            });
+
+            document.querySelectorAll('.service-qty')
+                .forEach(input => {
+                    const qty = parseInt(input.value || 0);
+
+                    if (qty > 0) {
+                        const serviceId =
+                            input.id.replace('service-', '');
+
+                        appendHidden(form, "serviceIds", serviceId);
+                        appendHidden(form, "quantities", qty);
+                    }
+                });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function appendHidden(form, name, value) {
+            const input = document.createElement("input");
+
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+
+            form.appendChild(input);
+        }
+
+        window.onload = () => {
+            const firstBtn = document.querySelector('.date-btn');
+
+            if (firstBtn) {
+                loadSlotsForDate(firstBtn.dataset.date);
+            }
+        };
+    </script>
+}

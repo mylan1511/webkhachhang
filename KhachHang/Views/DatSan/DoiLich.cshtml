@@ -1,0 +1,415 @@
+﻿@model KhachHang.Models.BookingDto
+
+@{
+    ViewBag.Title = "Đổi lịch | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int bookingId = ViewBag.BookingId;
+    int bookingDetailId = ViewBag.BookingDetailId;
+    var currentDetail = ViewBag.CurrentDetail as KhachHang.Models.BookingDetailDto;
+    var availableSlots = ViewBag.AvailableSlots as List<KhachHang.Models.FieldScheduleDto> ?? new();
+
+    // Group slots theo ngày
+    var slotsByDate = availableSlots
+     .SelectMany(schedule => schedule.Slots.Select(slot => new
+     {
+         schedule.SlotDate,
+         schedule.FieldId,
+         schedule.FieldName,
+         Slot = slot
+     }))
+     .Where(x =>
+         x.Slot.StatusId == 1 ||
+         (x.Slot.Status ?? "").ToLower().Contains("trống"))
+     .GroupBy(x => x.SlotDate)
+     .OrderBy(g => g.Key)
+     .ToList();
+}
+
+<main class="min-h-screen bg-surface py-10 px-4">
+    <div class="max-w-4xl mx-auto">
+
+        <!-- BREADCRUMB -->
+        <div class="mb-8">
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-outline">
+                <a href="/" class="hover:text-primary">Trang chủ</a>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <a asp-controller="LichSu" asp-action="Index" class="hover:text-primary">Lịch sử</a>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <a asp-controller="DatSan" asp-action="ChiTietDon" asp-route-id="@bookingId" class="hover:text-primary">
+                    #BK-@bookingId
+                </a>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <span class="text-primary">Đổi lịch</span>
+            </div>
+        </div>
+
+        <!-- HEADER -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-emerald-500 text-white p-8 shadow-xl mb-8">
+            <div class="absolute right-[-80px] top-[-80px] w-72 h-72 rounded-full bg-white/10"></div>
+            <div class="relative z-10">
+                <span class="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-5">
+                    <span class="material-symbols-outlined text-base">event_repeat</span>
+                    Đổi lịch đặt sân
+                </span>
+                <h1 class="text-3xl md:text-4xl font-headline font-extrabold">
+                    Chọn khung giờ mới
+                </h1>
+                <p class="mt-2 text-white/80">Đơn #BK-@bookingId</p>
+            </div>
+        </section>
+
+        <!-- THÔNG BÁO -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 text-red-700 font-medium border border-red-100">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <!-- KHUNG GIỜ HIỆN TẠI -->
+        @if (currentDetail != null)
+        {
+            <section class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
+                <h2 class="text-lg font-headline font-extrabold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">schedule</span>
+                    Khung giờ hiện tại
+                </h2>
+                <div class="bg-surface-container-lowest rounded-2xl p-5 flex flex-wrap gap-6">
+                    <div>
+                        <p class="text-xs text-on-surface-variant mb-1">Sân</p>
+                        <p class="font-bold">@currentDetail.FieldName</p>
+                        <p class="text-sm text-on-surface-variant">@currentDetail.FieldType</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-on-surface-variant mb-1">Ngày</p>
+                        <p class="font-bold">@currentDetail.SlotDate.ToString("dd/MM/yyyy")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-on-surface-variant mb-1">Giờ</p>
+                        <p class="font-bold">
+                            @currentDetail.StartTime.ToString(@"HH\:mm") - @currentDetail.EndTime.ToString(@"HH\:mm")
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-on-surface-variant mb-1">Giá</p>
+                        <p class="font-bold text-primary">@currentDetail.Price.ToString("N0")đ</p>
+                    </div>
+                </div>
+            </section>
+        }
+
+        <!-- CHỌN KHUNG GIỜ MỚI -->
+        <section class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        Chọn lịch mới
+                    </p>
+                    <h2 class="text-3xl font-headline font-extrabold">
+                        Lịch đổi sân
+                    </h2>
+                </div>
+
+                <p class="text-sm text-on-surface-variant">
+                    Chọn một khung giờ trống để đổi lịch
+                </p>
+            </div>
+
+            @if (!availableSlots.Any())
+            {
+                <div class="text-center py-12 bg-surface-container-lowest rounded-3xl">
+                    <span class="material-symbols-outlined text-5xl text-on-surface-variant">event_busy</span>
+                    <p class="mt-4 font-bold text-on-surface-variant">
+                        Không có khung giờ trống trong 7 ngày tới.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <form asp-controller="DatSan"
+                      asp-action="DoiLich"
+                      method="post"
+                      id="doiLichForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="bookingId" value="@bookingId" />
+                    <input type="hidden" name="bookingDetailId" value="@bookingDetailId" />
+                    <input type="hidden" name="newFieldSlotId" id="selectedSlotId" value="" />
+
+                    <div class="flex gap-3 mb-8 overflow-x-auto pb-3">
+                        @foreach (var dateGroup in slotsByDate)
+                        {
+                            <button type="button"
+                                    onclick="selectDate(this)"
+                                    data-date="@dateGroup.Key.ToString("yyyy-MM-dd")"
+                                    class="date-btn min-w-[130px] px-5 py-4 rounded-2xl whitespace-nowrap transition-all border-2 font-bold bg-white border-gray-200 hover:border-primary hover:text-primary">
+                                <span class="block text-sm">
+                                    @dateGroup.Key.ToString("ddd")
+                                </span>
+                                <span class="block text-lg">
+                                    @dateGroup.Key.ToString("dd/MM")
+                                </span>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+                         id="slotContainer">
+                    </div>
+
+                    <div id="selectedInfo"
+                         class="hidden mt-8 p-5 rounded-2xl bg-primary/10 border border-primary/20">
+                        <p class="font-bold text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                            Đã chọn khung giờ mới
+                        </p>
+                        <p id="selectedText" class="mt-1 text-sm font-medium text-on-surface-variant"></p>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                        <button type="submit"
+                                id="submitBtn"
+                                disabled
+                                class="flex-1 py-4 bg-primary text-white rounded-2xl font-bold text-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-700 transition-all">
+                            XÁC NHẬN ĐỔI LỊCH
+                        </button>
+
+                        <a asp-controller="DatSan"
+                               asp-action="ChiTietDon"
+                               asp-route-id="@bookingId"
+                               class="flex-1 py-4 border-2 rounded-2xl font-bold text-center hover:bg-gray-50 transition-all">
+                            HỦY BỎ
+                        </a>
+                    </div>
+                </form>
+            }
+        </section>
+        <!-- LƯU Ý -->
+        <div class="mt-6 p-5 rounded-2xl bg-blue-50 border border-blue-100 text-blue-700 text-sm">
+            <p class="font-bold mb-2">Lưu ý khi đổi lịch:</p>
+
+            <ul class="list-disc list-inside space-y-1">
+                <li>Chỉ được đổi lịch khi đã thanh toán cọc.</li>
+                <li>Chỉ được đổi lịch trước giờ thi đấu 2 tiếng.</li>
+                <li>Số lần đổi lịch có thể bị giới hạn theo chính sách.</li>
+                <li>Giá mới có thể thay đổi tùy theo khung giờ đã chọn.</li>
+            </ul>
+        </div>
+
+    </div> <!-- end max-w-4xl -->
+    <!-- MODAL CONFIRM -->
+    <div id="confirmRescheduleModal"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 text-center">
+
+            <div class="w-20 h-20 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-emerald-600 text-5xl">
+                    event_repeat
+                </span>
+            </div>
+
+            <h3 class="text-3xl font-headline font-extrabold mb-3">
+                Xác nhận đổi lịch?
+            </h3>
+
+            <p class="text-gray-600 leading-7">
+                Bạn có chắc muốn đổi sang khung giờ đã chọn không?
+            </p>
+
+            <div class="grid grid-cols-2 gap-4 mt-8">
+
+                <button type="button"
+                        onclick="closeConfirmModal()"
+                        class="py-4 rounded-2xl border font-bold hover:bg-gray-50 transition-all">
+                    Hủy
+                </button>
+
+                <button type="button"
+                        onclick="submitReschedule()"
+                        class="py-4 rounded-2xl bg-primary hover:bg-emerald-700 text-white font-bold transition-all">
+                    Xác nhận
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ERROR -->
+    <div id="errorModal"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 text-center">
+
+            <div class="w-20 h-20 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-red-600 text-5xl">
+                    error
+                </span>
+            </div>
+
+            <h3 class="text-3xl font-headline font-extrabold mb-3">
+                Có lỗi xảy ra
+            </h3>
+
+            <p id="errorModalText"
+                   class="text-gray-600 leading-7">
+                Vui lòng kiểm tra lại thông tin.
+            </p>
+
+            <button type="button"
+                    onclick="closeErrorModal()"
+                    class="mt-8 w-full py-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all">
+                Đã hiểu
+            </button>
+
+        </div>
+    </div>
+
+</main>
+<script>
+    const allSlots = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                slotsByDate.Select(g => new
+                {
+                        date = g.Key.ToString("yyyy-MM-dd"),
+                        slots = g.Select(x => new
+                        {
+                                fieldSlotId = x.Slot.FieldSlotId,
+                                startTime = x.Slot.StartTime.ToString(@"HH\:mm"),
+                                endTime = x.Slot.EndTime.ToString(@"HH\:mm"),
+                                price = x.Slot.Price
+                        })
+                })
+        ));
+
+    let pendingSubmit = false;
+
+    function selectDate(btn) {
+        document.querySelectorAll('.date-btn').forEach(b => {
+            b.classList.remove('bg-primary', 'text-white', 'border-primary', 'shadow-lg');
+            b.classList.add('bg-white', 'border-gray-200');
+        });
+
+        btn.classList.add('bg-primary', 'text-white', 'border-primary', 'shadow-lg');
+        btn.classList.remove('bg-white', 'border-gray-200');
+
+        loadSlots(btn.dataset.date);
+    }
+
+    function loadSlots(date) {
+        const container = document.getElementById('slotContainer');
+        const selected = allSlots.find(x => x.date === date);
+
+        container.innerHTML = '';
+        document.getElementById('selectedSlotId').value = '';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('selectedInfo').classList.add('hidden');
+
+        if (!selected || selected.slots.length === 0) {
+            container.innerHTML =
+                `<div class="col-span-full text-center text-gray-500 bg-surface-container rounded-2xl p-8">
+                    Không có khung giờ trống cho ngày này.
+                </div>`;
+            return;
+        }
+
+        selected.slots.forEach(slot => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+
+            btn.className =
+                'slot-btn rounded-2xl border-2 border-gray-200 p-5 text-center hover:border-primary hover:bg-primary/5 transition-all';
+
+            btn.innerHTML = `
+                <p class="text-xl font-headline font-extrabold">
+                    ${slot.startTime} - ${slot.endTime}
+                </p>
+                <p class="mt-2 font-bold text-primary">
+                    ${Number(slot.price).toLocaleString('vi-VN')}đ
+                </p>
+                <p class="mt-2 text-xs font-bold uppercase tracking-wide text-green-600">
+                    TRỐNG
+                </p>
+            `;
+
+            btn.onclick = function () {
+                selectSlot(slot.fieldSlotId, btn, slot);
+            };
+
+            container.appendChild(btn);
+        });
+    }
+
+    function selectSlot(slotId, btn, slot) {
+        document.querySelectorAll('.slot-btn').forEach(b => {
+            b.classList.remove('border-primary', 'bg-primary/10', 'ring-2', 'ring-primary');
+            b.classList.add('border-gray-200');
+        });
+
+        btn.classList.remove('border-gray-200');
+        btn.classList.add('border-primary', 'bg-primary/10', 'ring-2', 'ring-primary');
+
+        document.getElementById('selectedSlotId').value = slotId;
+
+        document.getElementById('selectedText').textContent =
+            `${slot.startTime} - ${slot.endTime} — ${Number(slot.price).toLocaleString('vi-VN')}đ`;
+
+        document.getElementById('selectedInfo').classList.remove('hidden');
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    document.getElementById('doiLichForm')?.addEventListener('submit', function (e) {
+        const slotId = document.getElementById('selectedSlotId').value;
+
+        if (!slotId) {
+            e.preventDefault();
+            showErrorModal('Vui lòng chọn một khung giờ mới.');
+            return;
+        }
+
+        if (!pendingSubmit) {
+            e.preventDefault();
+            openConfirmModal();
+        }
+    });
+
+    function openConfirmModal() {
+        const modal = document.getElementById('confirmRescheduleModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirmRescheduleModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function submitReschedule() {
+        pendingSubmit = true;
+        closeConfirmModal();
+        document.getElementById('doiLichForm').submit();
+    }
+
+    function showErrorModal(message) {
+        const modal = document.getElementById('errorModal');
+        document.getElementById('errorModalText').innerText = message;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeErrorModal() {
+        const modal = document.getElementById('errorModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        const firstBtn = document.querySelector('.date-btn');
+
+        if (firstBtn) {
+            selectDate(firstBtn);
+        }
+    });
+</script>

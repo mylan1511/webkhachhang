@@ -1,0 +1,346 @@
+﻿@model IEnumerable<KhachHang.Models.FieldDto>
+
+@{
+    ViewBag.Title = "Sân Bóng - Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+@functions {
+    public string GetImageUrl(string? imageUrl)
+    {
+        const string apiHost = "http://klcnhost-001-site1.ntempurl.com";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return "/images/default-field.jpg";
+
+        string fullUrl;
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            fullUrl = imageUrl;
+        else
+        {
+            if (imageUrl.StartsWith("~"))
+                imageUrl = imageUrl.Substring(1);
+            if (!imageUrl.StartsWith("/"))
+                imageUrl = "/" + imageUrl;
+            fullUrl = apiHost + imageUrl;
+        }
+
+        return "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullUrl);
+    }
+}
+
+<main class="min-h-screen bg-surface">
+
+    <!-- HERO -->
+    <section class="relative h-[360px] flex items-center justify-center overflow-hidden">
+        <img alt="Stadium"
+             class="absolute inset-0 w-full h-full object-cover"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBIqBs7OmDWil3bnIdkc7ukgCwYPWXHEWCtUdGfnCi3E9rCR3xxNPVF_9UR5SESIQmcF9CMjjj_pjlCvGe0zdzEabg3YigtlqtMkHMX8tURpITkKQpGNSfneBA2d5-xofOasKhykMxd3lm3jWcgnrdFlQjdFOuUtFn6EZPBl77drYon8yOVtfFzM3X-TYzRHeyvW47tE-DOZMh1-7NHWdKRssV-IOQYM12t7oKBOSicV1_S1J7dgDbh_fJJCmuAMIJoZonNhgf34o" />
+
+        <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/55 to-black/20"></div>
+
+        <div class="relative z-10 w-full max-w-5xl px-4 text-center text-white">
+            <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-5">
+                <span class="material-symbols-outlined text-base">
+                    sports_soccer
+                </span>
+                Sport Plus
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-headline font-extrabold tracking-tight">
+                TÌM SÂN ĐẤU CỦA BẠN
+            </h1>
+
+            <p class="mt-4 text-white/85 text-lg">
+                Tìm kiếm, lọc sân và đặt lịch nhanh chóng.
+            </p>
+        </div>
+    </section>
+
+    <section class="max-w-screen-2xl mx-auto px-6 md:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+        <!-- FILTER -->
+        <aside class="lg:col-span-3">
+
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sticky top-24">
+
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                            Bộ lọc
+                        </p>
+
+                        <h3 class="font-headline font-extrabold text-2xl text-on-surface">
+                            Tìm kiếm sân
+                        </h3>
+                    </div>
+
+                    <span class="material-symbols-outlined text-primary text-3xl">
+                        tune
+                    </span>
+                </div>
+
+                <form method="get" class="space-y-5">
+
+                    <!-- SEARCH -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                            Tên sân
+                        </label>
+
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                search
+                            </span>
+
+                            <input type="text"
+                                   name="search"
+                                   value="@ViewBag.Search"
+                                   class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
+                                   placeholder="Ví dụ: Elite A1" />
+                        </div>
+                    </div>
+
+                    <!-- TYPE -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                            Loại sân
+                        </label>
+
+                        <select name="typeId"
+                                class="w-full bg-surface-container border-0 rounded-full py-4 px-5 focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+                            <option value="">Tất cả loại sân</option>
+
+                            <option value="1" selected="@(ViewBag.SelectedTypeId == 1)">
+                                Sân 5 người
+                            </option>
+
+                            <option value="2" selected="@(ViewBag.SelectedTypeId == 2)">
+                                Sân 7 người
+                            </option>
+
+                            <option value="3" selected="@(ViewBag.SelectedTypeId == 3)">
+                                Sân 11 người
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                            Trạng thái
+                        </label>
+
+                        <select name="statusId"
+                                class="w-full bg-surface-container border-0 rounded-full py-4 px-5 focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all">
+                            <option value="">Tất cả trạng thái</option>
+
+                            <option value="1" selected="@(ViewBag.SelectedStatusId == 1)">
+                                Trống
+                            </option>
+
+                            <option value="2" selected="@(ViewBag.SelectedStatusId == 2)">
+                                Đang sử dụng
+                            </option>
+
+                            <option value="3" selected="@(ViewBag.SelectedStatusId == 3)">
+                                Bảo trì
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- PRICE -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                            Giá từ
+                        </label>
+
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                payments
+                            </span>
+
+                            <input type="number"
+                                   name="giaTu"
+                                   value="@ViewBag.GiaTu"
+                                   class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
+                                   placeholder="200000" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button type="submit"
+                                class="py-4 bg-primary text-white rounded-full font-headline font-extrabold uppercase tracking-wide hover:scale-[1.02] active:scale-95 transition-all shadow-lg">
+                            Lọc
+                        </button>
+
+                        <a href="/SanBong"
+                               class="py-4 border border-red-200 text-red-600 rounded-full text-center font-headline font-extrabold uppercase tracking-wide hover:bg-red-50 transition-all">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- LIST -->
+        <div class="lg:col-span-9">
+
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        Kết quả tìm kiếm
+                    </p>
+
+                    <h2 class="font-headline font-extrabold text-3xl text-on-surface">
+                        @Model.Count() sân phù hợp
+                    </h2>
+
+                </div>
+
+                <div class="text-sm text-on-surface-variant">
+                    Trang <strong>@currentPage</strong> / <strong>@totalPages</strong>
+                </div>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="bg-white rounded-3xl p-14 text-center border border-gray-100 shadow-sm">
+
+                    <div class="w-20 h-20 mx-auto rounded-full bg-surface-container flex items-center justify-center mb-5">
+                        <span class="material-symbols-outlined text-primary text-4xl">
+                            search_off
+                        </span>
+                    </div>
+
+                    <h3 class="text-2xl font-headline font-extrabold mb-2">
+                        Không tìm thấy sân
+                    </h3>
+
+                    <p class="text-on-surface-variant">
+                        Thử đổi bộ lọc hoặc reset tìm kiếm.
+                    </p>
+
+                    <a href="/SanBong"
+                           class="inline-flex mt-6 px-6 py-3 bg-primary text-white rounded-full font-bold">
+                        Xem tất cả sân
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                    @foreach (var field in Model)
+                    {
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all group border border-gray-100 flex flex-col">
+
+                            <!-- IMAGE -->
+                            <div class="relative h-56 overflow-hidden">
+
+                                <img src="@GetImageUrl(field.ImageUrl)"
+                                     alt="@field.Name"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='/images/default-field.jpg'" />
+
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+                                <div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
+                                    @(field.FieldType ?? "Sân bóng")
+                                </div>
+
+                                <div class="absolute top-4 right-4 bg-white/95 text-primary text-xs font-bold px-4 py-1.5 rounded-full shadow">
+                                    @(field.Status ?? "Không rõ")
+                                </div>
+
+                                <div class="absolute bottom-4 left-4 right-4 text-white">
+                                    <h3 class="font-headline font-extrabold text-2xl line-clamp-1">
+                                        @field.Name
+                                    </h3>
+
+                                    <p class="text-white/80 text-sm flex items-center gap-1 mt-1">
+                                        <span class="material-symbols-outlined text-sm">
+                                            location_on
+                                        </span>
+                                        TP. Hồ Chí Minh
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- CONTENT -->
+                            <div class="p-6 flex-1 flex flex-col">
+
+                                <p class="text-sm text-on-surface-variant leading-relaxed line-clamp-2 min-h-[42px]">
+                                    @(field.Description ?? "Sân bóng chất lượng cao, mặt cỏ đẹp, phù hợp thi đấu và giao lưu.")
+                                </p>
+
+                                <div class="flex items-center justify-between mt-5 mb-5">
+
+                                    <div class="flex items-center gap-2 text-sm text-yellow-600">
+                                        <span class="material-symbols-outlined text-base">
+                                            star
+                                        </span>
+
+                                        <span>
+                                            @(field.AvgRating?.ToString("0.0") ?? "0.0")
+                                            (@(field.TotalReviews ?? 0))
+                                        </span>
+                                    </div>
+
+                                    <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-bold">
+                                        ID #@field.FieldId
+                                    </span>
+                                </div>
+
+                                <div class="mt-auto border-t pt-5 flex justify-between items-end">
+
+                                    <div>
+                                        <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                                            Giá từ
+                                        </p>
+
+                                        <p class="text-2xl font-extrabold text-primary">
+                                            @field.BasePrice.ToString("N0")đ
+                                        </p>
+                                    </div>
+
+                                    <a asp-controller="DatSan"
+                                           asp-action="Index"
+                                           asp-route-id="@field.FieldId"
+                                           class="px-5 py-3 bg-primary text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 transition-all">
+                                        Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- PAGINATION -->
+            @if (totalPages > 1)
+            {
+                <div class="mt-12 flex justify-center gap-2 flex-wrap">
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <a asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-search="@ViewBag.Search"
+                               asp-route-typeId="@ViewBag.SelectedTypeId"
+                               asp-route-statusId="@ViewBag.SelectedStatusId"
+                               asp-route-giaTu="@ViewBag.GiaTu"
+                               class="min-w-11 h-11 px-4 flex items-center justify-center rounded-full font-bold transition-all @(i == currentPage ? "bg-primary text-white shadow-lg" : "bg-white border hover:border-primary hover:text-primary")">
+                            @i
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+</main>

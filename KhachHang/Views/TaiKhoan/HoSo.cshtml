@@ -1,0 +1,512 @@
+﻿@model KhachHang.Models.ProfileUserDto
+
+@{
+    ViewBag.Title = "Hồ sơ cá nhân - Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string rawAvatar =
+        Model?.Profile?.AvatarUrl ?? "";
+
+    string avatarSrc;
+    if (string.IsNullOrWhiteSpace(rawAvatar))
+    {
+        avatarSrc = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Model?.FullName ?? "User")}&background=006418&color=fff";
+    }
+    else
+    {
+        string fullAvatarUrl;
+        if (rawAvatar.StartsWith("http://") || rawAvatar.StartsWith("https://"))
+        {
+            fullAvatarUrl = rawAvatar;
+        }
+        else
+        {
+            if (!rawAvatar.StartsWith("/"))
+                rawAvatar = "/" + rawAvatar;
+            fullAvatarUrl = "http://klcnhost-001-site1.ntempurl.com" + rawAvatar;
+        }
+        avatarSrc = "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullAvatarUrl);
+    }
+}
+<style>
+    body {
+        background: #f8fafc;
+    }
+
+    .hero-gradient {
+        background: linear-gradient(135deg, #006418 0%, #0f8f2e 100%);
+    }
+</style>
+
+<main class="max-w-screen-2xl mx-auto px-4 md:px-8 py-8 min-h-screen">
+
+    <!-- HERO -->
+    <section class="relative overflow-hidden rounded-[32px] hero-gradient shadow-2xl">
+
+        <div class="absolute inset-0 opacity-10"
+             style="background-image:url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200'); background-size:cover;">
+        </div>
+
+        <div class="relative z-10 px-8 md:px-12 py-12 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+
+            <div class="flex items-center gap-6">
+
+                <!-- AVATAR -->
+                <div class="relative">
+
+                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl bg-white">
+
+                        <img id="avatarPreview"
+                             src="@avatarSrc"
+                             class="w-full h-full object-cover"
+                             alt="Avatar" />
+
+
+                    </div>
+
+                    <form asp-controller="TaiKhoan"
+                          asp-action="UploadAvatar"
+                          method="post"
+                          enctype="multipart/form-data"
+                          id="avatarForm">
+
+                        <label class="absolute bottom-2 right-2 bg-white text-primary rounded-full w-11 h-11 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-all">
+
+                            <span class="material-symbols-outlined">
+                                photo_camera
+                            </span>
+
+                            <input type="file"
+                                   name="avatarUpload"
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="previewAndSubmit(event)" />
+                        </label>
+                    </form>
+                </div>
+
+                <!-- INFO -->
+                <div class="text-white">
+
+                    <p class="uppercase text-xs tracking-[4px] font-bold opacity-80 mb-2">
+                        Thành viên Sport Plus
+                    </p>
+
+                    <h1 class="text-4xl md:text-5xl font-black leading-tight">
+                        @(Model?.FullName ?? "Người dùng")
+                    </h1>
+
+                    <div class="flex flex-wrap items-center gap-3 mt-4">
+
+                        <span class="bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-semibold">
+                            @(Model?.Role ?? "Khách hàng")
+                        </span>
+
+                        <span class="bg-emerald-400/20 border border-white/20 px-4 py-2 rounded-full text-sm font-semibold">
+                            @(Model?.Status ?? "Hoạt động")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCOUNT INFO -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 text-white min-w-[280px]">
+
+                <div class="space-y-4">
+
+                    <div>
+                        <p class="text-xs uppercase tracking-widest opacity-70">
+                            Email
+                        </p>
+
+                        <p class="font-bold mt-1 break-all">
+                            @(Model?.Email ?? "Chưa cập nhật")
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs uppercase tracking-widest opacity-70">
+                            Số điện thoại
+                        </p>
+
+                        <p class="font-bold mt-1">
+                            @(Model?.Phone ?? "Chưa cập nhật")
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs uppercase tracking-widest opacity-70">
+                            Ngày tham gia
+                        </p>
+
+                        <p class="font-bold mt-1">
+                            @(Model?.CreatedAt?.ToString("dd/MM/yyyy") ?? "Không rõ")
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ALERT -->
+    <div class="mt-8">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-6 py-5 rounded-3xl flex items-center gap-4 shadow-sm">
+
+                <span class="material-symbols-outlined text-3xl">
+                    check_circle
+                </span>
+
+                <div>
+                    <p class="font-bold text-lg">
+                        Thành công
+                    </p>
+
+                    <p>
+                        @TempData["SuccessMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border border-red-300 text-red-800 px-6 py-5 rounded-3xl flex items-center gap-4 shadow-sm">
+
+                <span class="material-symbols-outlined text-3xl">
+                    error
+                </span>
+
+                <div>
+                    <p class="font-bold text-lg">
+                        Có lỗi xảy ra
+                    </p>
+
+                    <p>
+                        @TempData["ErrorMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+
+        <!-- LEFT -->
+        <section class="lg:col-span-8 space-y-8">
+
+            <!-- PROFILE FORM -->
+            <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+
+                <div class="mb-8">
+
+                    <p class="text-primary uppercase tracking-[4px] text-xs font-bold mb-2">
+                        Hồ sơ cá nhân
+                    </p>
+
+                    <h2 class="text-3xl font-black">
+                        Cập nhật thông tin
+                    </h2>
+                </div>
+
+                <form asp-action="CapNhatHoSo"
+                      method="post">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- FULLNAME -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Họ và tên
+                            </label>
+
+                            <input name="FullName"
+                                   value="@(Model?.FullName ?? "")"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   required />
+                        </div>
+
+                        <!-- PHONE -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Số điện thoại
+                            </label>
+
+                            <input name="Phone"
+                                   value="@(Model?.Phone ?? "")"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary" />
+                        </div>
+
+                        <!-- DOB -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Ngày sinh
+                            </label>
+
+                            <input type="date"
+                                   name="DateOfBirth"
+                                   value="@(Model?.Profile?.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary" />
+                        </div>
+
+                        <!-- ADDRESS -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Địa chỉ
+                            </label>
+
+                            <input name="Address"
+                                   value="@(Model?.Profile?.Address ?? "")"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary" />
+                        </div>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="mt-6">
+
+                        <label class="block text-sm font-bold mb-3">
+                            Email
+                        </label>
+
+                        <input value="@(Model?.Email ?? "")"
+                               disabled
+                               class="w-full bg-gray-100 border border-gray-200 rounded-2xl px-5 py-4 text-gray-500 cursor-not-allowed" />
+                    </div>
+
+                    <!-- BUTTON -->
+                    <div class="mt-10 flex justify-end">
+
+                        <button type="submit"
+                                class="px-10 py-4 bg-primary hover:bg-emerald-800 text-white rounded-2xl font-black shadow-lg transition-all">
+                            LƯU THAY ĐỔI
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+
+                <div class="mb-8">
+
+                    <p class="text-primary uppercase tracking-[4px] text-xs font-bold mb-2">
+                        Bảo mật
+                    </p>
+
+                    <h2 class="text-3xl font-black">
+                        Đổi mật khẩu
+                    </h2>
+                </div>
+
+                <form asp-action="DoiMatKhau"
+                      method="post">
+
+
+                    <div class="space-y-6">
+
+                        <!-- CURRENT -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Mật khẩu hiện tại
+                            </label>
+
+                            <div class="relative">
+
+                                <input type="password"
+                                       id="currentPassword"
+                                       name="CurrentPassword"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 pr-14 focus:outline-none focus:ring-2 focus:ring-primary"
+                                       required />
+
+                                <button type="button"
+                                        onclick="togglePassword('currentPassword', this)"
+                                        class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500">
+
+                                    <span class="material-symbols-outlined">
+                                        visibility
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- NEW -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Mật khẩu mới
+                            </label>
+
+                            <div class="relative">
+
+                                <input type="password"
+                                       id="newPassword"
+                                       name="NewPassword"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 pr-14 focus:outline-none focus:ring-2 focus:ring-primary"
+                                       required />
+
+                                <button type="button"
+                                        onclick="togglePassword('newPassword', this)"
+                                        class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500">
+
+                                    <span class="material-symbols-outlined">
+                                        visibility
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CONFIRM -->
+                        <div>
+
+                            <label class="block text-sm font-bold mb-3">
+                                Xác nhận mật khẩu
+                            </label>
+
+                            <div class="relative">
+
+                                <input type="password"
+                                       id="confirmPassword"
+                                       name="ConfirmPassword"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 pr-14 focus:outline-none focus:ring-2 focus:ring-primary"
+                                       required />
+
+                                <button type="button"
+                                        onclick="togglePassword('confirmPassword', this)"
+                                        class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500">
+
+                                    <span class="material-symbols-outlined">
+                                        visibility
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- BUTTON -->
+                        <div class="mt-10 flex justify-end">
+
+                            <button type="submit"
+                                    class="px-10 py-4 bg-black hover:bg-gray-900 text-white rounded-2xl font-black shadow-lg transition-all">
+
+                                CẬP NHẬT MẬT KHẨU
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- RIGHT -->
+            <aside class="lg:col-span-4 space-y-8">
+
+                <!-- STATUS -->
+                <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+
+                    <h3 class="text-2xl font-black mb-6">
+                        Trạng thái tài khoản
+                    </h3>
+
+                    <div class="space-y-5">
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">
+                                Vai trò
+                            </span>
+
+                            <span class="font-bold text-primary">
+                                @(Model?.Role ?? "Khách")
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">
+                                Trạng thái
+                            </span>
+
+                            <span class="font-bold text-emerald-600">
+                                @(Model?.Status ?? "Hoạt động")
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">
+                                User ID
+                            </span>
+
+                            <span class="font-bold">
+                                #@Model?.UserId
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LOGOUT -->
+                <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
+
+                    <h3 class="text-2xl font-black mb-4">
+                        Phiên đăng nhập
+                    </h3>
+
+                    <p class="text-gray-500 leading-7 mb-6">
+                        Bạn có thể đăng xuất khỏi hệ thống bất cứ lúc nào.
+                    </p>
+
+                    <a asp-controller="TaiKhoan"
+                           asp-action="DangXuat"
+                           class="block text-center py-4 rounded-2xl border-2 border-red-500 text-red-600 font-black hover:bg-red-50 transition-all">
+                        ĐĂNG XUẤT
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    @section Scripts {
+
+        <script>
+
+            function previewAndSubmit(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Preview trước khi submit
+                const reader = new FileReader();
+                reader.onload = e => document.getElementById('avatarPreview').src = e.target.result;
+                reader.readAsDataURL(file);
+
+                // Submit form về controller
+                document.getElementById('avatarForm').submit();
+            }
+
+        </script>
+        <script>
+
+            function togglePassword(id, button) {
+
+                const input =
+                    document.getElementById(id);
+
+                const icon =
+                    button.querySelector("span");
+
+                if (input.type === "password") {
+
+                    input.type = "text";
+
+                    icon.textContent = "visibility_off";
+                }
+                else {
+
+                    input.type = "password";
+
+                    icon.textContent = "visibility";
+                }
+            }
+
+        </script>
+    }

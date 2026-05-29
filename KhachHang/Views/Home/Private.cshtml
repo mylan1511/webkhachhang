@@ -1,0 +1,160 @@
+﻿@model IEnumerable<KhachHang.Models.FieldDto>
+
+@{
+    ViewBag.Title = "Sport Plus - Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    public string GetImageUrl(string? imageUrl, string defaultImage)
+    {
+        const string apiHost = "http://klcnhost-001-site1.ntempurl.com";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return defaultImage;
+
+        string fullUrl;
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+        {
+            fullUrl = imageUrl;
+        }
+        else
+        {
+            if (!imageUrl.StartsWith("/"))
+                imageUrl = "/" + imageUrl;
+
+            fullUrl = apiHost + imageUrl;
+        }
+
+        return "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullUrl);
+    }
+}
+
+<main>
+    <!-- HERO -->
+    <section class="relative min-h-[620px] flex items-center justify-center overflow-hidden">
+
+        <div class="absolute inset-0 z-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-950"></div>
+
+        <div class="relative z-10 w-full max-w-5xl px-6 text-center">
+
+            <span class="inline-flex items-center gap-2 bg-white/15 text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur mb-6">
+                <span class="material-symbols-outlined text-base">
+                    sports_soccer
+                </span>
+                Sport Plus
+            </span>
+
+            <h1 class="text-5xl md:text-7xl font-headline font-extrabold text-white tracking-tight mb-6 drop-shadow-lg">
+                SẴN SÀNG RA SÂN?
+            </h1>
+
+            <p class="text-xl md:text-2xl text-emerald-100 font-medium max-w-3xl mx-auto leading-9">
+                Đặt sân nhanh, chọn khung giờ linh hoạt và tận hưởng trận đấu cùng bạn bè.
+            </p>
+
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+
+                <a asp-controller="SanBong"
+                       asp-action="Index"
+                       class="inline-flex items-center justify-center gap-3 px-10 py-5 bg-primary hover:bg-emerald-700 text-white rounded-2xl font-headline font-extrabold text-lg shadow-2xl transition-all active:scale-95">
+
+                    <span class="material-symbols-outlined">
+                        search
+                    </span>
+
+                    TÌM SÂN NGAY
+                </a>
+
+                <a asp-controller="LichSu"
+                       asp-action="Index"
+                       class="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white/15 hover:bg-white/25 text-white rounded-2xl font-bold backdrop-blur transition-all">
+
+                    <span class="material-symbols-outlined">
+                        history
+                    </span>
+
+                    Xem lịch sử
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SÂN GỢI Ý -->
+    <section class="max-w-screen-2xl mx-auto px-8 py-16">
+
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-primary">
+                    GỢI Ý CHO BẠN
+                </span>
+
+                <h2 class="text-4xl font-headline font-extrabold mt-2">
+                    Sân bóng nổi bật
+                </h2>
+            </div>
+
+            <a asp-controller="SanBong"
+                   asp-action="Index"
+                   class="text-primary font-bold flex items-center gap-2 hover:underline">
+                Xem tất cả
+                <span class="material-symbols-outlined">
+                    arrow_forward
+                </span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            @foreach (var field in Model.Take(3))
+            {
+                <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-100">
+
+                    <div class="relative h-56 overflow-hidden">
+
+                        <img src="@GetImageUrl(field.ImageUrl, "/images/default-field.jpg")"
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                             alt="@field.Name"
+                             onerror="this.onerror=null;this.src='/images/default-field.jpg';" />
+
+                        <div class="absolute top-4 left-4 bg-primary text-white text-xs px-3 py-1 rounded-full font-bold">
+                            Sẵn sàng
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+
+                        <h4 class="font-headline font-extrabold text-xl">
+                            @field.Name
+                        </h4>
+
+                        <p class="text-sm text-gray-500 mt-1">
+                            @(field.FieldType ?? "Sân bóng")
+                        </p>
+
+                        <div class="mt-6 flex justify-between items-end">
+
+                            <div>
+                                <p class="text-xs text-gray-500">
+                                    Giá từ
+                                </p>
+
+                                <p class="text-2xl font-headline font-extrabold text-primary">
+                                    @field.BasePrice.ToString("N0")đ
+                                </p>
+                            </div>
+
+                            <a asp-controller="DatSan"
+                                   asp-action="Index"
+                                   asp-route-id="@field.FieldId"
+                                   class="px-6 py-3 bg-primary text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 transition-all">
+                                Đặt ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</main>

@@ -1,0 +1,46 @@
+﻿@model KhachHang.Models.FieldDto
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+    <div class="h-64 overflow-hidden relative">
+        <img src="@(Model.ImageUrl ?? "/images/default-field.jpg")"
+             alt="@Model.Name"
+             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+        
+        <div class="absolute top-4 right-4 bg-primary text-white px-4 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+            TRỐNG LỊCH
+        </div>
+    </div>
+    
+    <div class="p-6">
+        <div class="flex justify-between items-start mb-2">
+            <h3 class="font-headline font-bold text-xl text-on-surface">@Model.Name</h3>
+            <div class="flex items-center text-yellow-500">
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-sm font-bold ml-1">4.8</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4 text-on-surface-variant text-sm mb-6">
+            <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-lg">location_on</span>
+                TP.HCM
+            </span>
+            <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-lg">groups</span>
+                @(Model.FieldType ?? "Sân bóng")
+            </span>
+        </div>
+        
+        <div class="flex items-center justify-between pt-6 border-t border-surface-container">
+            <div>
+                <p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">Giá từ</p>
+                <span class="text-2xl font-black text-primary">@Model.BasePrice.ToString("N0")đ</span>
+                <span class="text-sm text-on-surface-variant font-medium">/h</span>
+            </div>
+            <a asp-controller="DatSan" asp-action="Index" asp-route-id="@Model.FieldId"
+                   class="px-6 py-3 bg-primary text-white rounded-full font-bold shadow-md hover:scale-105 active:scale-95 transition-all">
+                ĐẶT SÂN
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,419 @@
+﻿@model KhachHang.Models.PendingBookingApi
+
+@{
+    ViewBag.Title = "Xác nhận đặt sân | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="min-h-screen bg-surface py-12 px-4">
+
+    <div class="max-w-6xl mx-auto">
+
+        <!-- HEADER -->
+        <div class="text-center mb-10">
+
+            <span class="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
+                <span class="material-symbols-outlined">verified</span>
+                Xác nhận đặt sân
+            </span>
+
+            <h1 class="text-4xl md:text-5xl font-headline font-extrabold mt-5">
+                Kiểm tra đơn đặt sân
+            </h1>
+
+            <p class="text-on-surface-variant mt-4 max-w-2xl mx-auto">
+                Sau khi xác nhận, hệ thống sẽ chuyển bạn sang trang thanh toán để chọn hình thức thanh toán.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- LEFT -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- SLOT -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+
+                    <div class="flex items-center gap-4 mb-8">
+
+                        <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-3xl">
+                                event_available
+                            </span>
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                                Khung giờ đã chọn
+                            </p>
+
+                            <h2 class="text-3xl font-headline font-extrabold">
+                                @Model.SelectedSlotIds.Count khung giờ
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        @foreach (var slotId in Model.SelectedSlotIds)
+                        {
+                            <div class="rounded-3xl border border-gray-100 bg-surface-container-lowest p-5 hover:shadow-md transition-all">
+
+                                <div class="flex justify-between items-center">
+
+                                    <div>
+                                        <p class="text-sm text-on-surface-variant">
+                                            Mã khung giờ
+                                        </p>
+
+                                        <p class="text-2xl font-headline font-extrabold text-primary">
+                                            #@slotId
+                                        </p>
+                                    </div>
+
+                                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary">
+                                            schedule
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+                <!-- SERVICES -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+
+                    <div class="flex items-center gap-4 mb-8">
+
+                        <div class="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-orange-600 text-3xl">
+                                local_cafe
+                            </span>
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                                Dịch vụ đi kèm
+                            </p>
+
+                            <h2 class="text-3xl font-headline font-extrabold">
+                                Dịch vụ đã chọn
+                            </h2>
+                        </div>
+                    </div>
+
+                    @if (Model.Services != null && Model.Services.Any())
+                    {
+                        <div class="space-y-4">
+
+                            @foreach (var service in Model.Services)
+                            {
+                                <div class="flex justify-between items-center bg-surface-container-lowest rounded-3xl p-5 border border-gray-100 hover:shadow-md transition-all">
+
+                                    <div>
+                                        <p class="font-bold text-lg">
+                                            Dịch vụ #@service.ServiceId
+                                        </p>
+
+                                        <p class="text-sm text-on-surface-variant mt-1">
+                                            Số lượng:
+                                            <span class="font-bold text-primary">
+                                                @service.Quantity
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary">
+                                            check_circle
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-on-surface-variant bg-surface-container-lowest rounded-3xl p-10">
+                            Bạn chưa chọn dịch vụ đi kèm.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <aside class="lg:col-span-4">
+
+                <div class="sticky top-24 space-y-6">
+
+                    <!-- POLICY -->
+                    <div class="bg-primary text-white rounded-3xl p-8 shadow-lg">
+
+                        <h3 class="font-headline font-extrabold text-2xl mb-6">
+                            Quy định đặt sân
+                        </h3>
+
+                        <div class="space-y-4 text-sm">
+
+                            <div class="flex justify-between">
+                                <span>Giữ chỗ</span>
+                                <span class="font-bold">Tự động</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span>Tiền cọc</span>
+                                <span class="font-bold">20%</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span>Hủy sân</span>
+                                <span class="font-bold">Trước 2 giờ</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-white/10 rounded-2xl p-4 text-sm leading-7">
+                            • Hệ thống sẽ kiểm tra slot trước khi thanh toán <br />
+                            • Nếu slot đã có người đặt, hệ thống sẽ báo lỗi <br />
+                            • Bạn sẽ chọn thanh toán cọc hoặc toàn bộ ở bước tiếp theo
+                        </div>
+                    </div>
+
+                    <!-- CONFIRM -->
+                    <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+
+                        <h3 class="font-headline font-extrabold text-2xl mb-6">
+                            Xác nhận đơn
+                        </h3>
+
+                        <!-- PROMOTION -->
+                        <div class="mb-6">
+
+                            <label class="block text-sm font-bold mb-3">
+                                Mã khuyến mãi
+                            </label>
+
+                            <div class="flex items-center gap-3">
+
+                                <input type="text"
+                                       id="promotionCode"
+                                       value="@Model.PromotionCode"
+                                       placeholder="Nhập mã giảm giá..."
+                                       class="flex-1 border border-gray-200 rounded-2xl px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+
+                                <button type="button"
+                                        id="btnCheckPromotion"
+                                        class="px-3 h-10 min-w-[90px] flex items-center justify-center bg-primary text-white rounded-full text-xs font-bold hover:bg-emerald-700 transition-all shrink-0">
+                                    ÁP DỤNG
+                                </button>
+                            </div>
+
+                            <div id="promotionResult"
+                                 class="mt-3 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="space-y-5">
+
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">
+                                    Số khung giờ
+                                </span>
+
+                                <span class="font-bold text-primary text-lg">
+                                    @Model.SelectedSlotIds.Count
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">
+                                    Số dịch vụ
+                                </span>
+
+                                <span class="font-bold text-orange-600 text-lg">
+                                    @(Model.Services?.Count ?? 0)
+                                </span>
+                            </div>
+
+                            <hr />
+
+                            <div class="bg-primary/5 rounded-2xl p-4 text-sm text-on-surface-variant leading-7">
+                                Sau khi nhấn xác nhận:
+                                <br />
+                                • Lưu thông tin đặt sân tạm thời
+                                <br />
+                                • Chuyển sang trang thanh toán
+                                <br />
+                                • Bạn chọn thanh toán cọc hoặc toàn bộ ở bước tiếp theo
+                            </div>
+                        </div>
+
+                        <form asp-controller="DatSan"
+                              asp-action="CreateConfirmed"
+                              method="post"
+                              class="mt-8">
+
+                            <input type="hidden"
+                                   name="fieldId"
+                                   value="@Model.FieldId" />
+
+                            <input type="hidden"
+                                   name="promotionCode"
+                                   id="promotionCodeHidden"
+                                   value="@Model.PromotionCode" />
+
+                            @foreach (var slotId in Model.SelectedSlotIds)
+                            {
+                                <input type="hidden"
+                                       name="selectedSlotIds"
+                                       value="@slotId" />
+                            }
+
+                            @if (Model.Services != null)
+                            {
+                                @foreach (var service in Model.Services)
+                                {
+                                    <input type="hidden"
+                                           name="serviceIds"
+                                           value="@service.ServiceId" />
+
+                                    <input type="hidden"
+                                           name="quantities"
+                                           value="@service.Quantity" />
+                                }
+                            }
+
+                            <button type="submit"
+                                    id="btnConfirmBooking"
+                                    class="w-full py-5 bg-primary text-white rounded-2xl font-headline font-extrabold text-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-lg">
+                                XÁC NHẬN ĐẶT SÂN
+                            </button>
+                        </form>
+
+                        <a asp-controller="DatSan"
+                               asp-action="Index"
+                               asp-route-id="@Model.FieldId"
+                               class="block mt-4 text-center py-4 border rounded-2xl font-bold hover:bg-gray-50 transition-all">
+
+                            QUAY LẠI CHỈNH SỬA
+                        </a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    @section Scripts {
+
+        <script>
+
+                const form =
+                    document.querySelector('form');
+
+                const btn =
+                    document.getElementById('btnConfirmBooking');
+
+                if (form && btn) {
+
+                    form.addEventListener('submit', function () {
+
+                        btn.disabled = true;
+
+                        btn.innerText = "ĐANG XỬ LÝ...";
+
+                        btn.classList.add(
+                            "opacity-60",
+                            "cursor-not-allowed");
+                    });
+                }
+
+                const btnPromotion =
+                    document.getElementById("btnCheckPromotion");
+
+                const inputPromotion =
+                    document.getElementById("promotionCode");
+
+                const hiddenPromotion =
+                    document.getElementById("promotionCodeHidden");
+
+                const resultPromotion =
+                    document.getElementById("promotionResult");
+
+                if (btnPromotion) {
+
+                    btnPromotion.addEventListener("click", async () => {
+
+                        const code =
+                            inputPromotion.value.trim();
+
+                        if (!code) {
+
+                            resultPromotion.innerHTML =
+                                `<span class="text-red-500">
+                                    Vui lòng nhập mã.
+                                </span>`;
+
+                            return;
+                        }
+
+                        resultPromotion.innerHTML =
+                            "Đang kiểm tra...";
+
+                        const response =
+                            await fetch('/DatSan/CheckPromotion', {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+
+                                body: `code=${encodeURIComponent(code)}`
+                            });
+
+                        const data =
+                            await response.json();
+
+                        if (data.success) {
+
+                            hiddenPromotion.value = data.code;
+
+                            resultPromotion.innerHTML =
+                                `
+                                <div class="bg-green-50 border border-green-200 rounded-2xl p-4 text-green-700">
+
+                                    <div class="font-bold">
+                                        ${data.name}
+                                    </div>
+
+                                    <div class="text-sm mt-1">
+                                        Giảm:
+                                        ${data.discount}
+                                    </div>
+
+                                    <div class="text-xs mt-2">
+                                        ${data.description ?? ""}
+                                    </div>
+                                </div>
+                                `;
+                        }
+                        else {
+
+                            hiddenPromotion.value = "";
+
+                            resultPromotion.innerHTML =
+                                `
+                                <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-600">
+                                    ${data.message}
+                                </div>
+                                `;
+                        }
+                    });
+                }
+
+        </script>
+    }
+</main>

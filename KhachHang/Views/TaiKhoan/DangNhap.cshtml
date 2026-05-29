@@ -1,0 +1,178 @@
+﻿@model KhachHang.Models.ViewModels.DangNhapVM
+
+@{
+    ViewBag.Title = "Đăng nhập | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="min-h-[calc(100vh-80px)] flex flex-col md:flex-row overflow-hidden">
+
+    <!-- LEFT -->
+    <div class="hidden md:block md:w-1/2 lg:w-3/5 relative overflow-hidden">
+
+        <img alt="Sân vận động"
+             class="absolute inset-0 w-full h-full object-cover"
+             src="~/lib/anhdannhap.jpg" />
+
+        <div class="absolute inset-0 bg-gradient-to-tr from-primary/80 to-transparent"></div>
+
+        <div class="absolute bottom-16 left-16 max-w-lg z-10">
+
+            <h1 class="text-5xl lg:text-7xl font-headline font-extrabold text-white tracking-tight leading-none mb-6">
+                SẴN SÀNG<br />RA SÂN
+            </h1>
+
+            <p class="text-white/80 text-xl font-medium max-w-sm">
+                Trải nghiệm hệ thống đặt sân thể thao hàng đầu Việt Nam.
+            </p>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="w-full md:w-1/2 lg:w-2/5 bg-surface flex flex-col justify-center items-center p-8 md:p-16 lg:p-24">
+
+        <div class="w-full max-w-md">
+
+            <div class="mb-10">
+
+                <span class="text-[10px] font-label font-bold uppercase tracking-widest text-primary mb-2 block">
+                    Chào mừng trở lại
+                </span>
+
+                <h2 class="text-4xl font-headline font-extrabold text-on-background tracking-tight">
+                    Đăng nhập
+                </h2>
+            </div>
+
+            <form asp-action="DangNhap"
+                  method="post"
+                  class="space-y-6">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="returnUrl"
+                       value="@ViewBag.ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-red-600 text-sm"></div>
+
+                <!-- Identifier -->
+                <div class="space-y-2">
+
+                    <label class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant block ml-1">
+                        Email hoặc SĐT
+                    </label>
+
+                    <div class="relative">
+
+                        <span class="material-symbols-outlined absolute left-4 top-4 text-on-surface-variant">
+                            person
+                        </span>
+
+                        <input asp-for="Identifier"
+                               class="w-full pl-12 pr-4 py-4 bg-surface-container border-none rounded-full focus:ring-2 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 transition-all"
+                               placeholder="Nhập email hoặc số điện thoại" />
+                    </div>
+
+                    <span asp-validation-for="Identifier"
+                          class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-2">
+
+                    <label class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant block ml-1">
+                        Mật khẩu
+                    </label>
+
+                    <div class="relative">
+
+                        <span class="material-symbols-outlined absolute left-4 top-4 text-on-surface-variant">
+                            lock
+                        </span>
+
+                        <input asp-for="Password"
+                               id="loginPassword"
+                               type="password"
+                               class="w-full pl-12 pr-12 py-4 bg-surface-container border-none rounded-full focus:ring-2 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 transition-all"
+                               placeholder="••••••••" />
+
+                        <button type="button"
+                                onclick="togglePassword('loginPassword', 'toggleIconLogin')"
+                                class="absolute right-4 top-4 text-on-surface-variant hover:text-primary transition-colors">
+
+                            <span id="toggleIconLogin"
+                                  class="material-symbols-outlined">
+                                visibility_off
+                            </span>
+                        </button>
+                    </div>
+
+                    <span asp-validation-for="Password"
+                          class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Remember -->
+                <div class="flex items-center justify-between text-sm">
+
+                    <a asp-action="QuenMatKhau"
+                           class="text-primary hover:underline">
+                        Quên mật khẩu?
+                    </a>
+                </div>
+
+                <!-- Button -->
+                <button type="submit"
+                        class="w-full py-4 bg-primary text-white font-headline font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-200 uppercase tracking-wide">
+                    ĐĂNG NHẬP
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+
+                <p class="text-on-surface-variant text-sm">
+
+                    Chưa có tài khoản?
+
+                    <a asp-action="DangKy"
+                           class="text-primary font-bold hover:underline ml-1">
+
+                        Đăng ký ngay
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        function togglePassword(inputId, iconId) {
+
+            const passwordInput =
+                document.getElementById(inputId);
+
+            const icon =
+                document.getElementById(iconId);
+
+            if (passwordInput.type === "password") {
+
+                passwordInput.type = "text";
+
+                icon.textContent = "visibility";
+
+            } else {
+
+                passwordInput.type = "password";
+
+                icon.textContent = "visibility_off";
+            }
+        }
+
+    </script>
+}

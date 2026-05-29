@@ -1,0 +1,441 @@
+﻿@{
+    ViewBag.Title = "Thanh toán VNPay | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    decimal totalAmount = Model.TotalAmount ?? 0m;
+    decimal depositAmount = Model.DepositAmount ?? 0m;
+    decimal remainingAmount = totalAmount - depositAmount;
+
+    // FORCE FULL PAYMENT UI
+    bool forceFullPayment =
+        Context.Session.GetString($"FullPayment_{Model.BookingId}") == "true";
+
+    // FULL PAYMENT
+    bool isFullPaid =
+        totalAmount > 0 &&
+        depositAmount >= totalAmount;
+
+    // FIRST SLOT
+    KhachHang.Models.BookingDetailDto? firstSlot = null;
+
+    if (Model.Details != null)
+    {
+        foreach (var item in Model.Details)
+        {
+            firstSlot = item;
+            break;
+        }
+    }
+
+    string statusLower = (Model.Status ?? "").ToLower();
+
+    // CHỜ THANH TOÁN / CHỜ ĐẶT CỌC
+    bool isWaitingDeposit =
+        !forceFullPayment &&
+        !isFullPaid &&
+        (
+            Model.StatusId == 1 ||
+            Model.StatusId == 5 ||
+            statusLower.Contains("chờ đặt cọc") ||
+            statusLower.Contains("chờ thanh toán")
+        );
+
+    // ĐÃ THANH TOÁN FULL
+    bool isCompleted =
+        forceFullPayment ||
+        isFullPaid ||
+        Model.StatusId == 4 ||
+        statusLower.Contains("hoàn tất") ||
+        statusLower.Contains("đã thanh toán");
+
+    // ĐÃ ĐẶT CỌC
+    bool isDeposited =
+        !isCompleted &&
+        !isFullPaid &&
+        (
+            Model.StatusId == 2 ||
+            statusLower.Contains("đã đặt cọc") ||
+            statusLower.Contains("đã xác nhận")
+        );
+
+    decimal payToday =
+        isWaitingDeposit
+            ? depositAmount
+            : isDeposited
+                ? remainingAmount
+                : 0m;
+
+    string paymentTitle =
+        isWaitingDeposit
+            ? "Chọn hình thức thanh toán"
+            : isDeposited
+                ? "Thanh toán phần còn lại"
+                : "Thanh toán toàn bộ thành công";
+
+    string paymentDesc =
+        isWaitingDeposit
+            ? "Bạn có thể thanh toán cọc hoặc thanh toán toàn bộ đơn bằng VNPay."
+            : isDeposited
+                ? "Đơn đã được đặt cọc. Bạn có thể thanh toán phần còn lại bằng VNPay hoặc tiền mặt tại sân."
+                : "Đơn đặt sân đã được thanh toán toàn bộ bằng VNPay.";
+}
+
+<main class="min-h-screen bg-surface py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="mb-8">
+            <a asp-controller="DatSan"
+                   asp-action="ChiTietDon"
+                   asp-route-id="@Model.BookingId"
+                   class="inline-flex items-center gap-2 text-primary font-bold hover:underline">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Quay lại chi tiết đơn
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+                    <div class="mb-8">
+                        <span class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
+                            <span class="material-symbols-outlined text-base">account_balance</span>
+                            VNPay Payment
+                        </span>
+
+                        <h1 class="text-4xl font-headline font-extrabold mt-5">
+                            @paymentTitle
+                        </h1>
+
+                        <p class="text-on-surface-variant mt-3">
+                            @paymentDesc
+                        </p>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-3xl p-6 mb-8">
+                        <h3 class="text-xl font-headline font-extrabold mb-5">
+                            Thông tin đặt sân
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <p class="text-sm text-on-surface-variant">Mã đơn</p>
+                                <p class="font-bold text-lg">#BK-@Model.BookingId</p>
+                            </div>
+
+                            <div>
+                                <p class="text-sm text-on-surface-variant">Trạng thái</p>
+                                <p class="font-bold text-primary">
+                                    @(isCompleted
+                                        ? "Đã thanh toán toàn bộ"
+                                        : Model.Status ?? "Chờ đặt cọc")
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-sm text-on-surface-variant">Sân</p>
+                                <p class="font-bold text-lg">
+                                    @(firstSlot?.FieldName ?? "Sân bóng")
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-sm text-on-surface-variant">Khung giờ</p>
+                                <p class="font-bold">
+                                    @if (firstSlot != null)
+                                    {
+                                        @firstSlot.StartTime.ToString(@"HH\:mm")
+                                        <span>-</span>
+                                        @firstSlot.EndTime.ToString(@"HH\:mm")
+                                    }
+                                    else
+                                    {
+                                        <span>Không rõ</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isWaitingDeposit)
+                    {
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+
+                            <!-- DEPOSIT -->
+                            <div class="border-2 border-blue-200 bg-blue-50 rounded-3xl p-6">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-blue-700 text-white flex items-center justify-center">
+                                        <span class="material-symbols-outlined">savings</span>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs uppercase tracking-widest font-bold text-blue-700">
+                                            Hình thức 1
+                                        </p>
+
+                                        <h3 class="text-xl font-headline font-extrabold text-blue-800">
+                                            Đặt cọc trước
+                                        </h3>
+                                    </div>
+                                </div>
+
+                                <p class="text-blue-700/80 leading-7 text-sm">
+                                    Thanh toán tiền cọc trước để xác nhận đơn.
+                                </p>
+
+                                <div class="mt-5 flex justify-between items-end">
+                                    <span class="text-sm text-blue-700">
+                                        Thanh toán hôm nay
+                                    </span>
+
+                                    <span class="font-headline font-extrabold text-2xl text-blue-800">
+                                        @depositAmount.ToString("N0")đ
+                                    </span>
+                                </div>
+
+                                <form asp-controller="ThanhToan"
+                                      asp-action="TaoThanhToanVnPay"
+                                      method="post"
+                                      class="mt-6">
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="bookingId"
+                                           value="@Model.BookingId" />
+
+                                    <input type="hidden"
+                                           name="paymentMode"
+                                           value="deposit" />
+
+                                    <button type="submit"
+                                            class="w-full py-4 bg-blue-700 hover:bg-blue-800 text-white rounded-2xl font-headline font-extrabold transition-all">
+                                        THANH TOÁN CỌC VNPAY
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- FULL -->
+                            <div class="border-2 border-slate-200 bg-slate-50 rounded-3xl p-6">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center">
+                                        <span class="material-symbols-outlined">done_all</span>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs uppercase tracking-widest font-bold text-slate-700">
+                                            Hình thức 2
+                                        </p>
+
+                                        <h3 class="text-xl font-headline font-extrabold text-slate-900">
+                                            Thanh toán toàn bộ
+                                        </h3>
+                                    </div>
+                                </div>
+
+                                <p class="text-slate-600 leading-7 text-sm">
+                                    Thanh toán toàn bộ giá trị đơn trong một lần.
+                                </p>
+
+                                <div class="mt-5 flex justify-between items-end">
+                                    <span class="text-sm text-slate-600">
+                                        Thanh toán hôm nay
+                                    </span>
+
+                                    <span class="font-headline font-extrabold text-2xl text-slate-900">
+                                        @totalAmount.ToString("N0")đ
+                                    </span>
+                                </div>
+
+                                <form asp-controller="ThanhToan"
+                                      asp-action="TaoThanhToanVnPay"
+                                      method="post"
+                                      class="mt-6">
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="bookingId"
+                                           value="@Model.BookingId" />
+
+                                    <input type="hidden"
+                                           name="paymentMode"
+                                           value="full" />
+
+                                    <button type="submit"
+                                            class="w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-headline font-extrabold transition-all">
+                                        THANH TOÁN TOÀN BỘ VNPAY
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isDeposited)
+                    {
+                        <div class="border-2 border-emerald-200 bg-emerald-50 rounded-3xl p-6 mb-8">
+                            <h3 class="text-2xl font-headline font-extrabold text-emerald-700">
+                                Đơn đã đặt cọc thành công
+                            </h3>
+
+                            <p class="text-emerald-700/80 mt-2 leading-7">
+                                Bạn đã hoàn tất bước đặt cọc.
+                            </p>
+
+                            <div class="mt-6 bg-white rounded-2xl p-5">
+                                <div class="flex justify-between mb-3">
+                                    <span class="text-gray-500">Đã đặt cọc</span>
+
+                                    <span class="font-bold text-emerald-700">
+                                        @depositAmount.ToString("N0")đ
+                                    </span>
+                                </div>
+
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Còn lại</span>
+
+                                    <span class="font-bold text-orange-600">
+                                        @remainingAmount.ToString("N0")đ
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form asp-controller="ThanhToan"
+                              asp-action="TaoThanhToanVnPay"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="bookingId"
+                                   value="@Model.BookingId" />
+
+                            <input type="hidden"
+                                   name="paymentMode"
+                                   value="remaining" />
+
+                            <button type="submit"
+                                    class="w-full py-5 bg-blue-700 hover:bg-blue-800 text-white rounded-2xl font-headline font-extrabold text-xl shadow-lg transition-all">
+                                THANH TOÁN PHẦN CÒN LẠI BẰNG VNPAY
+                            </button>
+                        </form>
+                    }
+
+                    @if (isCompleted)
+                    {
+                        <div class="border-2 border-emerald-200 bg-emerald-50 rounded-3xl p-8 text-center">
+
+                            <div class="w-20 h-20 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center mb-5">
+                                <span class="material-symbols-outlined text-5xl">
+                                    check
+                                </span>
+                            </div>
+
+                            <h3 class="text-3xl font-headline font-extrabold text-emerald-700">
+                                Đơn đã thanh toán toàn bộ
+                            </h3>
+
+                            <p class="text-emerald-700/80 mt-3">
+                                Đơn đặt sân đã được thanh toán toàn bộ bằng VNPay.
+                            </p>
+
+                            <a asp-controller="DatSan"
+                                   asp-action="ChiTietDon"
+                                   asp-route-id="@Model.BookingId"
+                                   class="inline-flex mt-8 px-8 py-4 bg-primary text-white rounded-2xl font-bold">
+                                Xem chi tiết đơn
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <aside class="lg:col-span-4">
+                <div class="sticky top-24">
+
+                    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+
+                        <h3 class="text-2xl font-headline font-extrabold mb-6">
+                            Tóm tắt thanh toán
+                        </h3>
+
+                        <div class="space-y-5">
+
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">
+                                    Tổng tiền
+                                </span>
+
+                                <span class="font-bold">
+                                    @totalAmount.ToString("N0")đ
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">
+                                    Tiền cọc
+                                </span>
+
+                                <span class="font-bold text-blue-700">
+                                    @depositAmount.ToString("N0")đ
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">
+                                    Còn lại
+                                </span>
+
+                                <span class="font-bold text-orange-600">
+                                    @(isCompleted
+                                        ? "0"
+                                        : remainingAmount.ToString("N0"))đ
+                                </span>
+                            </div>
+
+                            <hr />
+
+                            <div class="flex justify-between text-xl">
+                                <span class="font-bold">
+                                    Thanh toán hôm nay
+                                </span>
+
+                                <span class="font-headline font-extrabold text-blue-700">
+                                    @payToday.ToString("N0")đ
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-blue-50 text-blue-700 rounded-2xl p-4 text-sm leading-7">
+
+                            @if (isWaitingDeposit)
+                            {
+                                <span>
+                                    ✔ Hình thức 1: đặt cọc trước.
+                                    <br />
+                                    ✔ Hình thức 2: thanh toán toàn bộ trong một lần.
+                                </span>
+                            }
+                            else if (isDeposited)
+                            {
+                                <span>
+                                    ✔ Đơn đã được đặt cọc.
+                                    <br />
+                                    ✔ Bạn còn cần thanh toán phần còn lại.
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    ✔ Đơn đã được thanh toán toàn bộ bằng VNPay.
+                                </span>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>

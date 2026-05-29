@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Sport Plus</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <script>
+        tailwind.config = {
+        darkMode: "class",
+        content: ["./**/*.cshtml"],
+        theme: {
+        extend: {
+        colors: {
+        "surface-container-low": "#f3f4f5",
+        "surface-container": "#edeeef",
+        "surface-variant": "#e1e3e4",
+        "on-surface": "#191c1d",
+        "on-surface-variant": "#40493d",
+        "primary": "#006418",
+        "primary-container": "#267e2e",
+        "on-primary": "#ffffff",
+        "background": "#f8f9fa"
+        },
+
+        fontFamily: {
+        "headline": ["Manrope"],
+        "body": ["Inter"]
+        },
+
+        borderRadius: {
+        DEFAULT: "1rem",
+        lg: "2rem",
+        xl: "3rem",
+        full: "9999px"
+        }
+        }
+        }
+        }
+    </script>
+
+    <style>
+        body {
+        background: #f8f9fa;
+        }
+
+        .glass-panel {
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(12px);
+        }
+
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .hero-gradient {
+        background: linear-gradient(135deg, #006418 0%, #106d20 100%);
+        }
+
+        .toast-enter {
+        animation: slideToast .35s ease-out;
+        }
+
+        @@keyframes slideToast {
+        from {
+        transform: translateX(120%);
+        opacity: 0;
+        }
+
+        to {
+        transform: translateX(0);
+        opacity: 1;
+        }
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background">
+
+    <!-- NAVBAR -->
+    <header class="bg-white/80 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b border-gray-100">
+
+        <nav class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+
+            <!-- Logo -->
+            <div class="flex items-center gap-2">
+
+                <div class="text-2xl font-extrabold text-emerald-800 italic font-headline tracking-tight">
+                    Sport Plus
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <div class="hidden md:flex items-center space-x-8 font-headline font-extrabold tracking-tight uppercase">
+                <a asp-controller="Home" asp-action="Index" class="hover:text-emerald-700 transition-colors">Trang chủ</a>
+                <a asp-controller="SanBong" asp-action="Index" class="hover:text-emerald-700 transition-colors">Sân bóng</a>
+                <a asp-controller="LichSu" asp-action="Index" class="hover:text-emerald-700 transition-colors">Lịch sử</a>
+            </div>
+
+            <!-- Right -->
+            <div class="flex items-center gap-3">
+
+                <a asp-controller="ThongBao"
+                       asp-action="Index"
+                       class="relative p-2 hover:bg-gray-100 rounded-full transition-all">
+
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
+
+                    @if ((Context.Session.GetInt32("UnreadNotificationCount") ?? 0) > 0)
+                    {
+                        <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">
+                            @Context.Session.GetInt32("UnreadNotificationCount")
+                        </span>
+                    }
+
+                </a>
+
+                @if (Context.Session.GetInt32("UserId") != null)
+                {
+                    <a asp-controller="TaiKhoan"
+                           asp-action="HoSo"
+                           class="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-2xl transition-all">
+
+                        <div class="hidden sm:block text-right">
+                            <p class="text-xs font-bold uppercase tracking-widest text-emerald-600">THÀNH VIÊN</p>
+                            <p class="text-sm font-semibold text-gray-800">@Context.Session.GetString("FullName")</p>
+                        </div>
+
+                        @{
+                            string rawAvatar = Context.Session.GetString("AvatarUrl") ?? "";
+
+                            string avatarHeader;
+                            if (string.IsNullOrWhiteSpace(rawAvatar))
+                            {
+                                avatarHeader = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Context.Session.GetString("FullName") ?? "User")}&background=006418&color=fff";
+                            }
+                            else
+                            {
+                                string fullAvatarUrl;
+                                if (rawAvatar.StartsWith("http://") || rawAvatar.StartsWith("https://"))
+                                {
+                                    fullAvatarUrl = rawAvatar;
+                                }
+                                else
+                                {
+                                    if (!rawAvatar.StartsWith("/"))
+                                        rawAvatar = "/" + rawAvatar;
+                                    fullAvatarUrl = "http://klcnhost-001-site1.ntempurl.com" + rawAvatar;
+                                }
+                                avatarHeader = "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullAvatarUrl);
+                            }
+                        }
+
+                        <div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-emerald-600 shadow-sm">
+                            <img alt="Avatar" class="w-full h-full object-cover" src="@avatarHeader" />
+                        </div>
+                    </a>
+
+                    <a asp-controller="TaiKhoan"
+                           asp-action="DangXuat"
+                           class="hidden md:inline-flex px-4 py-2 border border-red-200 text-red-600 rounded-full font-bold hover:bg-red-50 transition-all">
+                        Đăng xuất
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="TaiKhoan"
+                           asp-action="DangNhap"
+                           class="px-5 py-2 text-emerald-700 font-medium hover:underline">
+                        Đăng nhập
+                    </a>
+
+                    <a asp-controller="TaiKhoan"
+                           asp-action="DangKy"
+                           class="px-6 py-2 bg-primary text-white rounded-full font-bold shadow-lg hover:scale-105 transition-all">
+                        Đăng ký
+                    </a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <!-- TOAST ALERT -->
+    <div id="toast-area" class="fixed top-24 right-6 z-[9999] space-y-3 w-[calc(100%-2rem)] max-w-md">
+
+        @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+        {
+            <div class="toast-message toast-enter bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-start gap-3">
+                <span class="material-symbols-outlined">
+                    check_circle
+                </span>
+
+                <div>
+                    <p class="font-bold">
+                        Thành công
+                    </p>
+
+                    <p class="text-sm text-white/90">
+                        @(TempData["SuccessMessage"] ?? TempData["Success"])
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null || TempData["Error"] != null)
+        {
+            <div class="toast-message toast-enter bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-start gap-3">
+                <span class="material-symbols-outlined">
+                    error
+                </span>
+
+                <div>
+                    <p class="font-bold">
+                        Có lỗi xảy ra
+                    </p>
+
+                    <p class="text-sm text-white/90">
+                        @(TempData["ErrorMessage"] ?? TempData["Error"])
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Info"] != null)
+        {
+            <div class="toast-message toast-enter bg-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-start gap-3">
+                <span class="material-symbols-outlined">
+                    info
+                </span>
+
+                <div>
+                    <p class="font-bold">
+                        Thông báo
+                    </p>
+
+                    <p class="text-sm text-white/90">
+                        @TempData["Info"]
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (TempData["RequireLogin"] != null)
+    {
+        <script>
+            alert("@TempData["RequireLogin"]");
+            window.location.href = "/TaiKhoan/DangNhap";
+        </script>
+    }
+
+    <!-- BODY -->
+    @RenderBody()
+
+    <script>
+        setTimeout(() => {
+        document.querySelectorAll('.toast-message').forEach(toast => {
+        toast.style.transition = 'all .35s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(120%)';
+
+        setTimeout(() => toast.remove(), 400);
+        });
+        }, 3500);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

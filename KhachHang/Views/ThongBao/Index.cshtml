@@ -1,0 +1,232 @@
+﻿@model IEnumerable<KhachHang.Models.NotificationDto>
+
+@{
+    ViewBag.Title = "Thông báo | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool? selectedIsRead = ViewBag.IsRead as bool?;
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int unreadCount = ViewBag.UnreadCount ?? 0;
+}
+
+<main class="min-h-screen bg-surface py-10 px-4">
+
+    <div class="max-w-6xl mx-auto">
+
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-emerald-500 text-white p-8 md:p-10 shadow-xl mb-8">
+
+            <div class="absolute right-[-80px] top-[-80px] w-72 h-72 rounded-full bg-white/10"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+
+                <div>
+                    <span class="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-5">
+                        <span class="material-symbols-outlined text-base">
+                            notifications
+                        </span>
+                        Sport Plus
+                    </span>
+
+                    <h1 class="text-4xl md:text-5xl font-headline font-extrabold">
+                        Thông báo
+                    </h1>
+
+                    <p class="text-white/80 mt-3">
+                        Theo dõi cập nhật về đơn đặt sân, thanh toán và tài khoản của bạn.
+                    </p>
+                </div>
+
+                <div class="bg-white/15 rounded-3xl p-6 min-w-[180px] text-center">
+
+                    <p class="text-sm text-white/80">
+                        Chưa đọc
+                    </p>
+
+                    <p class="text-4xl font-headline font-extrabold">
+                        @unreadCount
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-8">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                <div class="flex flex-wrap gap-3">
+
+                    <a asp-action="Index"
+                           class="px-5 py-3 rounded-full font-bold @(selectedIsRead == null ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant")">
+                        Tất cả
+                    </a>
+
+                    <a asp-action="Index"
+                           asp-route-isRead="false"
+                           class="px-5 py-3 rounded-full font-bold @(selectedIsRead == false ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant")">
+                        Chưa đọc
+                    </a>
+
+                    <a asp-action="Index"
+                           asp-route-isRead="true"
+                           class="px-5 py-3 rounded-full font-bold @(selectedIsRead == true ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant")">
+                        Đã đọc
+                    </a>
+                </div>
+
+                <form asp-action="MarkAllAsRead"
+                      method="post">
+
+                    <button type="submit"
+                            class="px-5 py-3 border border-primary text-primary rounded-full font-bold hover:bg-primary/5">
+                        Đánh dấu tất cả đã đọc
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        @if (!Model.Any())
+        {
+            <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-16 text-center">
+
+                <div class="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-6">
+
+                    <span class="material-symbols-outlined text-primary text-5xl">
+                        notifications_off
+                    </span>
+                </div>
+
+                <h2 class="text-3xl font-headline font-extrabold mb-4">
+                    Chưa có thông báo
+                </h2>
+
+                <p class="text-on-surface-variant">
+                    Hiện chưa có thông báo nào phù hợp với bộ lọc này.
+                </p>
+            </section>
+        }
+        else
+        {
+            <div class="space-y-4">
+
+                @foreach (var item in Model)
+                {
+                    <article class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+
+                        <div class="p-6 flex flex-col md:flex-row md:items-start md:justify-between gap-5">
+
+                            <div class="flex gap-4">
+
+                                <div class="w-14 h-14 rounded-2xl @(item.IsRead ? "bg-gray-100 text-gray-500" : "bg-primary/10 text-primary") flex items-center justify-center shrink-0">
+
+                                    <span class="material-symbols-outlined">
+                                        @(item.IsRead ? "drafts" : "mark_email_unread")
+                                    </span>
+                                </div>
+
+                                <div>
+
+                                    <div class="flex items-center gap-3 mb-2">
+
+                                        <h3 class="text-xl font-headline font-extrabold">
+                                            @(item.Title ?? "Thông báo")
+                                        </h3>
+
+                                        @if (!item.IsRead)
+                                        {
+                                            <span class="px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-bold">
+                                                Mới
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <p class="text-on-surface-variant leading-7">
+                                        @(item.Body ?? "")
+                                    </p>
+
+                                    <div class="flex flex-wrap gap-3 mt-4 text-sm text-on-surface-variant">
+
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-base">
+                                                category
+                                            </span>
+                                            @(item.Type ?? "Thông báo")
+                                        </span>
+
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-base">
+                                                schedule
+                                            </span>
+                                            @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* FIX Bug 2: Tách 2 trường hợp rõ ràng.
+                                 Thông báo chưa đọc → POST MarkAsRead (controller tự redirect đúng chỗ).
+                                 Thông báo đã đọc + có refId booking → link thẳng đến chi tiết đơn.
+                                 Thông báo đã đọc + không có refId → không cần action gì. *@
+                            <div class="shrink-0">
+                                @if (!item.IsRead)
+                                {
+                                    <form asp-action="MarkAsRead" method="post">
+                                        <input type="hidden" name="notificationId" value="@item.NotificationId" />
+                                        <input type="hidden" name="refId" value="@item.RefId" />
+                                        <input type="hidden" name="type" value="@item.Type" />
+
+                                        <button type="submit"
+                                                class="px-5 py-3 rounded-2xl bg-primary text-white hover:bg-emerald-700 font-bold transition-all">
+                                            Đọc
+                                        </button>
+                                    </form>
+                                }
+                                else if (item.RefId.HasValue &&
+                                         !string.IsNullOrWhiteSpace(item.Type) &&
+                                         item.Type.ToLower().Contains("booking"))
+                                {
+                                    <a asp-controller="DatSan"
+                                           asp-action="ChiTietDon"
+                                           asp-route-id="@item.RefId.Value"
+                                           class="px-5 py-3 rounded-2xl border hover:bg-gray-50 font-bold transition-all inline-block">
+                                        Xem đơn
+                                    </a>
+                                }
+                                @* Thông báo đã đọc, không có link → không hiển thị nút *@
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            @if (totalPages > 1)
+            {
+                <div class="mt-10 flex justify-center gap-2 flex-wrap">
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        @* FIX Bug 1: Chỉ truyền asp-route-isRead khi có giá trị,
+                             tránh render ?isRead= rỗng làm backend hiểu sai filter. *@
+                        @if (selectedIsRead.HasValue)
+                        {
+                            <a asp-action="Index"
+                                   asp-route-page="@i"
+                                   asp-route-isRead="@selectedIsRead"
+                                   class="min-w-11 h-11 px-4 flex items-center justify-center rounded-full font-bold transition-all @(i == currentPage ? "bg-primary text-white shadow-lg" : "bg-white border hover:border-primary hover:text-primary")">
+                                @i
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-action="Index"
+                                   asp-route-page="@i"
+                                   class="min-w-11 h-11 px-4 flex items-center justify-center rounded-full font-bold transition-all @(i == currentPage ? "bg-primary text-white shadow-lg" : "bg-white border hover:border-primary hover:text-primary")">
+                                @i
+                            </a>
+                        }
+                    }
+                </div>
+            }
+        }
+    </div>
+</main>

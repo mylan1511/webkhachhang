@@ -1,0 +1,122 @@
+﻿@model KhachHang.Models.BookingDto?
+
+@{
+    ViewBag.Title = "Thanh toán thành công";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    decimal totalAmount = Model.TotalAmount ?? 0m;
+    decimal depositAmount = Model.DepositAmount ?? 0m;
+    decimal remainingAmount = Math.Max(totalAmount - depositAmount, 0m);
+
+    bool isDeposited = Model.StatusId == 2 || (Model.Status ?? "").ToLower().Contains("đặt cọc");
+
+    decimal paidAmount = isDeposited ? depositAmount : totalAmount;
+
+    string paymentTitle = isDeposited ? "Đặt cọc thành công!" : "Thanh toán thành công!";
+    string paymentDescription = isDeposited
+        ? "Bạn đã thanh toán tiền cọc thành công. Phần còn lại sẽ thanh toán tại sân."
+        : "Bạn đã hoàn tất thanh toán cho đơn đặt sân.";
+}
+
+<div class="min-h-screen bg-surface py-16 px-4">
+    <div class="max-w-2xl mx-auto">
+
+        <div class="bg-white rounded-3xl shadow-xl p-10 text-center">
+
+            <!-- Icon -->
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl text-emerald-600">check_circle</span>
+            </div>
+
+            <!-- Tiêu đề -->
+            <h1 class="text-4xl font-headline font-extrabold text-emerald-600 mb-3">
+                @paymentTitle
+            </h1>
+
+            <p class="text-on-surface-variant text-lg leading-relaxed mb-8">
+                @paymentDescription
+            </p>
+
+            <!-- Mã đơn nổi bật -->
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl px-8 py-5 mb-8 inline-block w-full">
+                <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-1">Mã đơn của bạn</p>
+                <p class="text-4xl font-headline font-extrabold text-emerald-700">#BK-@Model.BookingId</p>
+            </div>
+
+            <!-- Chi tiết thanh toán -->
+            <div class="bg-gray-50 rounded-2xl p-6 text-left space-y-4 mb-6">
+
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Tổng tiền đơn</span>
+                    <span class="font-bold">@totalAmount.ToString("N0")đ</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Đã thanh toán</span>
+                    <span class="font-bold text-emerald-600">@paidAmount.ToString("N0")đ</span>
+                </div>
+
+                @if (isDeposited)
+                {
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Còn lại thanh toán tại sân</span>
+                        <span class="font-bold text-orange-600">@remainingAmount.ToString("N0")đ</span>
+                    </div>
+                }
+
+                <hr />
+
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Trạng thái</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-bold
+                        @(isDeposited ? "bg-yellow-100 text-yellow-700" : "bg-emerald-100 text-emerald-700")">
+                        @(isDeposited ? "Đã đặt cọc" : "Đã thanh toán")
+                    </span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Thời gian</span>
+                    <span class="font-bold">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+            </div>
+
+            <!-- Ghi chú -->
+            @if (isDeposited)
+            {
+                <div class="p-4 bg-yellow-50 text-yellow-700 rounded-2xl text-sm text-left leading-relaxed mb-8">
+                    <strong>Lưu ý:</strong> Khi đến sân, vui lòng thanh toán phần còn lại cho nhân viên
+                    bằng tiền mặt hoặc quét mã QR. Sau khi xác nhận, đơn sẽ chuyển sang
+                    <strong>Đã thanh toán</strong>.
+                </div>
+            }
+            else
+            {
+                <div class="p-4 bg-emerald-50 text-emerald-700 rounded-2xl text-sm text-left leading-relaxed mb-8">
+                    <strong>Hoàn tất:</strong> Đơn đặt sân của bạn đã được thanh toán đầy đủ. Hẹn gặp bạn tại sân!
+                </div>
+            }
+
+            <!-- Nút điều hướng -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a asp-controller="DatSan"
+                       asp-action="ChiTietDon"
+                       asp-route-id="@Model.BookingId"
+                       class="px-6 py-3 bg-primary hover:bg-emerald-700 text-white rounded-2xl font-bold transition">
+                    Xem chi tiết đơn
+                </a>
+
+                <a asp-controller="LichSu"
+                       asp-action="Index"
+                       class="px-6 py-3 border border-gray-300 hover:bg-gray-50 rounded-2xl font-bold transition">
+                    Lịch sử đặt sân
+                </a>
+
+                <a asp-controller="SanBong"
+                       asp-action="Index"
+                       class="px-6 py-3 border border-gray-300 hover:bg-gray-50 rounded-2xl font-bold transition">
+                    Đặt sân mới
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

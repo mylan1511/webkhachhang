@@ -1,0 +1,250 @@
+﻿@model KhachHang.Models.ViewModels.DangKyVM
+
+@{
+    ViewBag.Title = "Đăng ký | Sport Plus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="min-h-[calc(100vh-80px)] flex items-center justify-center p-4 md:p-8">
+
+    <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl overflow-hidden shadow-2xl min-h-[700px]">
+
+        <!-- LEFT -->
+        <div class="relative hidden md:flex flex-col justify-end p-12 overflow-hidden">
+
+            <div class="absolute inset-0 z-0">
+
+                <img alt="Stadium"
+                     class="w-full h-full object-cover"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbU5ilREITlyx_ltqtk32yhrV1JedSCNtG4Bhj7GxpJcouYMtHZW6R83-uQF3SfDXIBLTzDpBz2Hr_Bb-RH1vjZlQrNRz70R5wuOfEa9xMoLDcuMUa9UfqJVSuSQQGaJkEzMlVqmYy41BKTivfqns8qoMCmnZBeJypQ3esYAnKWxQct4Yk8qi2iByN0wRKyl7Pq7J1ZUpu7OQNZuCIKjEQtAs6k_f1BL4ExwVewPfCewPqwgSCdePzFriZt6th7nrwOk77rhXtcsA" />
+
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent"></div>
+            </div>
+
+            <div class="relative z-10 text-white">
+
+                <div class="mb-4 inline-flex items-center gap-2 bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+
+                    <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+
+                    Gia nhập cộng đồng
+                </div>
+
+                <h1 class="font-headline text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+                    CHINH PHỤC<br />MỌI SÂN CỎ
+                </h1>
+
+                <p class="font-body text-emerald-100/90 text-lg max-w-md">
+                    Tham gia hệ thống quản lý và đặt sân bóng hàng đầu Việt Nam.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="p-8 md:p-16 flex flex-col justify-center bg-white">
+
+            <div class="mb-10 text-center md:text-left">
+
+                <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-2">
+                    Tạo tài khoản mới
+                </h2>
+
+                <p class="text-on-surface-variant font-medium">
+                    Bắt đầu hành trình của bạn cùng Sport Plus ngay hôm nay.
+                </p>
+            </div>
+
+            <form asp-action="DangKy"
+                  method="post"
+                  class="space-y-6">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-red-600"></div>
+
+                <!-- FullName -->
+                <div class="space-y-1.5">
+
+                    <label class="block font-label text-[10px] font-extrabold uppercase tracking-widest text-outline">
+                        Họ tên
+                    </label>
+
+                    <div class="relative group">
+
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                            person
+                        </span>
+
+                        <input asp-for="FullName"
+                               class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
+                               placeholder="Nguyễn Văn A" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="space-y-1.5">
+
+                    <label class="block font-label text-[10px] font-extrabold uppercase tracking-widest text-outline">
+                        Email
+                    </label>
+
+                    <div class="relative group">
+
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                            mail
+                        </span>
+
+                        <input asp-for="Email"
+                               class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
+                               placeholder="example@sportplus.vn" />
+
+                        <span asp-validation-for="Email"
+                              class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="space-y-1.5">
+
+                    <label class="block font-label text-[10px] font-extrabold uppercase tracking-widest text-outline">
+                        Số điện thoại
+                    </label>
+
+                    <div class="relative group">
+
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                            call
+                        </span>
+
+                        <input asp-for="Phone"
+                               class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
+                               placeholder="0123456789" />
+
+                        <span asp-validation-for="Phone"
+                              class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-1.5">
+
+                    <label class="block font-label text-[10px] font-extrabold uppercase tracking-widest text-outline">
+                        Mật khẩu
+                    </label>
+
+                    <div class="relative group">
+
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                            lock
+                        </span>
+
+                        <input asp-for="Password"
+                               id="password"
+                               type="password"
+                               class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-12 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none" />
+
+                        <button type="button"
+                                onclick="togglePassword('password', 'toggleIcon1')"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors">
+
+                            <span id="toggleIcon1"
+                                  class="material-symbols-outlined">
+                                visibility_off
+                            </span>
+                        </button>
+
+                        <span asp-validation-for="Password"
+                              class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Confirm -->
+                <div class="space-y-1.5">
+
+                    <label class="block font-label text-[10px] font-extrabold uppercase tracking-widest text-outline">
+                        Xác nhận mật khẩu
+                    </label>
+
+                    <div class="relative group">
+
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                            shield
+                        </span>
+
+                        <input asp-for="ConfirmPassword"
+                               id="confirmPassword"
+                               type="password"
+                               class="w-full bg-surface-container border-0 rounded-full py-4 pl-12 pr-12 focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none" />
+
+                        <button type="button"
+                                onclick="togglePassword('confirmPassword', 'toggleIcon2')"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors">
+
+                            <span id="toggleIcon2"
+                                  class="material-symbols-outlined">
+                                visibility_off
+                            </span>
+                        </button>
+
+                        <span asp-validation-for="ConfirmPassword"
+                              class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <button type="submit"
+                        class="w-full bg-primary text-on-primary font-headline font-extrabold py-4 rounded-full uppercase tracking-tighter text-lg shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                    ĐĂNG KÝ
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+
+                <a asp-action="DangNhap"
+                       class="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all font-medium">
+
+                    Đã có tài khoản?
+
+                    <span class="font-bold">
+                        Đăng nhập ngay
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        function togglePassword(inputId, iconId) {
+
+            const passwordInput =
+                document.getElementById(inputId);
+
+            const icon =
+                document.getElementById(iconId);
+
+            if (passwordInput.type === "password") {
+
+                passwordInput.type = "text";
+
+                icon.textContent = "visibility";
+
+            } else {
+
+                passwordInput.type = "password";
+
+                icon.textContent = "visibility_off";
+            }
+        }
+
+    </script>
+}

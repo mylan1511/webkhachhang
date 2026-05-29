@@ -1,0 +1,108 @@
+﻿@model IEnumerable<KhachHang.Models.FieldDto>
+
+@functions {
+    public string GetImageUrl(string? imageUrl)
+    {
+        const string apiHost = "http://klcnhost-001-site1.ntempurl.com";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return "/images/default-field.jpg";
+
+        string fullUrl;
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            fullUrl = imageUrl;
+        else
+        {
+            if (imageUrl.StartsWith("~"))
+                imageUrl = imageUrl.Substring(1);
+            if (!imageUrl.StartsWith("/"))
+                imageUrl = "/" + imageUrl;
+            fullUrl = apiHost + imageUrl;
+        }
+
+        return "/SanBong/ProxyImage?url=" + Uri.EscapeDataString(fullUrl);
+    }
+}
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+    @foreach (var field in Model)
+    {
+        <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all group border border-gray-100 flex flex-col">
+
+            <div class="relative h-56 overflow-hidden">
+                <img src="@GetImageUrl(field.ImageUrl)"
+                     alt="@field.Name"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                     onerror="this.src='/images/default-field.jpg'" />
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+                <div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
+                    @(field.FieldType ?? "Sân bóng")
+                </div>
+
+                <div class="absolute top-4 right-4 bg-white/95 text-primary text-xs font-bold px-4 py-1.5 rounded-full shadow">
+                    @(field.Status ?? "Không rõ")
+                </div>
+
+                <div class="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 class="font-headline font-extrabold text-2xl line-clamp-1">
+                        @field.Name
+                    </h3>
+
+                    <p class="text-white/80 text-sm flex items-center gap-1 mt-1">
+                        <span class="material-symbols-outlined text-sm">
+                            location_on
+                        </span>
+                        TP. Hồ Chí Minh
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-6 flex-1 flex flex-col">
+
+                <p class="text-sm text-on-surface-variant leading-relaxed line-clamp-2 min-h-[42px]">
+                    @(field.Description ?? "Sân bóng chất lượng cao, mặt cỏ đẹp, phù hợp thi đấu và giao lưu.")
+                </p>
+
+                <div class="flex items-center justify-between mt-5 mb-5">
+                    <div class="flex items-center gap-2 text-sm text-yellow-600">
+                        <span class="material-symbols-outlined text-base">
+                            star
+                        </span>
+
+                        <span>
+                            @(field.AvgRating?.ToString("0.0") ?? "0.0")
+                            (@(field.TotalReviews ?? 0))
+                        </span>
+                    </div>
+
+                    <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-bold">
+                        ID #@field.FieldId
+                    </span>
+                </div>
+
+                <div class="mt-auto border-t pt-5 flex justify-between items-end">
+
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                            Giá từ
+                        </p>
+
+                        <p class="text-2xl font-extrabold text-primary">
+                            @field.BasePrice.ToString("N0")đ
+                        </p>
+                    </div>
+
+                    <a asp-controller="DatSan"
+                           asp-action="Index"
+                           asp-route-id="@field.FieldId"
+                           class="px-5 py-3 bg-primary text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 transition-all">
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

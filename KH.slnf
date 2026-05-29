@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "khachhang.slnx",
+    "projects": [
+      "KhachHang\\KhachHang.csproj"
+    ]
+  }
+}

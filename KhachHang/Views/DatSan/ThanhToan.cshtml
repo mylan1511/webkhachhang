@@ -1,0 +1,67 @@
+﻿@model KhachHang.Models.BookingDto
+
+@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto py-10">
+
+    <div class="bg-white rounded-3xl shadow-xl p-8">
+
+        <h1 class="text-3xl font-bold mb-8">Thanh toán đơn #BK-@Model.BookingId</h1>
+
+        <div class="space-y-3 mb-8">
+            <div class="flex justify-between">
+                <span>Tổng tiền:</span>
+                <span class="font-bold">@(Model.TotalAmount ?? 0m).ToString("N0")đ</span>
+            </div>
+
+            <div class="flex justify-between">
+                <span>Tiền cọc:</span>
+                <span class="font-bold text-emerald-600">
+                    @(Model.DepositAmount ?? 0m).ToString("N0")đ
+                </span>
+            </div>
+        </div>
+
+        <form asp-action="XuLyThanhToan" method="post">
+            <input type="hidden" name="bookingId" value="@Model.BookingId" />
+
+            <!-- Loại thanh toán -->
+            <h3 class="font-bold mb-3">Loại thanh toán</h3>
+
+            <div class="space-y-2 mb-6">
+                <label class="block">
+                    <input type="radio" name="paymentType" value="Deposit" checked />
+                    Đặt cọc (20%)
+                </label>
+
+                <label class="block">
+                    <input type="radio" name="paymentType" value="Full" />
+                    Thanh toán toàn bộ
+                </label>
+            </div>
+
+            <!-- Phương thức -->
+            <h3 class="font-bold mb-3">Phương thức thanh toán</h3>
+
+            <div class="space-y-2 mb-8">
+                <label class="block">
+                    <input type="radio" name="paymentMethod" value="Cash" checked />
+                    Tiền mặt
+                </label>
+
+                <label class="block">
+                    <input type="radio" name="paymentMethod" value="MoMo" />
+                    MoMo
+                </label>
+            </div>
+
+            <button type="submit"
+                    class="w-full py-4 bg-primary text-white rounded-2xl font-bold">
+                XÁC NHẬN THANH TOÁN
+            </button>
+        </form>
+    </div>
+</div>
