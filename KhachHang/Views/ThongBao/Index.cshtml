@@ -163,10 +163,7 @@
                                 </div>
                             </div>
 
-                            @* FIX Bug 2: Tách 2 trường hợp rõ ràng.
-                                 Thông báo chưa đọc → POST MarkAsRead (controller tự redirect đúng chỗ).
-                                 Thông báo đã đọc + có refId booking → link thẳng đến chi tiết đơn.
-                                 Thông báo đã đọc + không có refId → không cần action gì. *@
+                           
                             <div class="shrink-0">
                                 @if (!item.IsRead)
                                 {

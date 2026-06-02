@@ -9,7 +9,7 @@ namespace KhachHang.Services
         private readonly HttpClient _httpClient;
 
         private const string BaseUrl =
-            "http://klcnhost-001-site1.ntempurl.com/api/fields";
+            "http://sportplusklcn10-001-site1.ltempurl.com/api/fields";
 
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -70,8 +70,7 @@ namespace KhachHang.Services
             var data =
                 result?.Data ?? new PagedResult<FieldDto>();
 
-            // API /fields không có query GiaTu,
-            // nên lọc giá ở frontend MVC sau khi lấy dữ liệu
+
             if (filter.GiaTu.HasValue &&
                 filter.GiaTu.Value > 0)
             {

@@ -277,38 +277,27 @@ namespace KhachHang.Controllers
 
         [HttpGet]
         [Route("ThanhToan/ThanhCong/{bookingId:int}")]
-        public async Task<IActionResult> ThanhCong(int bookingId)
+        public IActionResult ThanhCong(int bookingId)
         {
-            ViewBag.BookingId = bookingId;
+            TempData["SuccessMessage"] = "Thanh toán thành công.";
 
-            var token = HttpContext.Session.GetString("AccessToken");
+            HttpContext.Session.Remove($"FullPayment_{bookingId}");
+            HttpContext.Session.Remove($"FakeDepositedBooking_{bookingId}");
+            HttpContext.Session.Remove($"FakePaidBooking_{bookingId}");
 
-            if (string.IsNullOrEmpty(token))
-            {
-                TempData["SuccessMessage"] = "Thanh toán VNPay thành công.";
-                return View("ThanhCong");
-            }
-
-            try
-            {
-                var booking = await _bookingApiService.GetBookingByIdAsync(
-                    token,
-                    bookingId);
-
-                return View("ThanhCong", booking);
-            }
-            catch
-            {
-                TempData["SuccessMessage"] = "Thanh toán VNPay thành công.";
-                return View("ThanhCong");
-            }
+            return RedirectToAction("Index", "LichSu");
         }
+
         [HttpGet]
         [Route("ThanhToan/ThatBai/{bookingId:int}")]
         public IActionResult ThatBai(int bookingId)
         {
-            ViewBag.BookingId = bookingId;
-            return View("ThatBai");
+            TempData["ErrorMessage"] = "Thanh toán thất bại hoặc đã bị hủy.";
+
+            return RedirectToAction(
+                "Index",
+                "ThanhToan",
+                new { id = bookingId });
         }
     }
 }

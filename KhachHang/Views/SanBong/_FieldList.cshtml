@@ -3,10 +3,12 @@
 @functions {
     public string GetImageUrl(string? imageUrl)
     {
-        const string apiHost = "http://klcnhost-001-site1.ntempurl.com";
+        const string apiHost = "http://sportplusklcn10-001-site1.ltempurl.com";
 
         if (string.IsNullOrWhiteSpace(imageUrl))
             return "/images/default-field.jpg";
+
+        imageUrl = imageUrl.Trim();
 
         string fullUrl;
 
@@ -16,8 +18,10 @@
         {
             if (imageUrl.StartsWith("~"))
                 imageUrl = imageUrl.Substring(1);
+
             if (!imageUrl.StartsWith("/"))
                 imageUrl = "/" + imageUrl;
+
             fullUrl = apiHost + imageUrl;
         }
 

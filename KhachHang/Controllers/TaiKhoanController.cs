@@ -17,7 +17,7 @@ namespace KhachHang.Controllers
         private readonly ProfileApiService _profileApiService;
 
         private const string BaseUrl =
-            "http://klcnhost-001-site1.ntempurl.com/api/auth";
+            "http://sportplusklcn10-001-site1.ltempurl.com/api/auth";
 
         public TaiKhoanController(
             HttpClient httpClient,

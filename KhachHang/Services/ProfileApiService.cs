@@ -11,7 +11,7 @@ namespace KhachHang.Services
         private readonly HttpClient _httpClient;
 
         private const string BaseUrl =
-            "http://klcnhost-001-site1.ntempurl.com/api/profile";
+            "http://sportplusklcn10-001-site1.ltempurl.com/api/profile";
 
         private readonly JsonSerializerOptions _jsonOptions = new()
         {

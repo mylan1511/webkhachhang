@@ -7,7 +7,7 @@ namespace KhachHang.Services
         private readonly HttpClient _http;
 
         private const string BaseUrl =
-            "http://klcnhost-001-site1.ntempurl.com/api/auth";
+            "http://sportplusklcn10-001-site1.ltempurl.com/api/auth";
 
         public AuthApiService(HttpClient http)
         {

@@ -10,7 +10,7 @@ namespace KhachHang.Services
         private readonly HttpClient _httpClient;
 
         private const string BaseUrl =
-            "http://klcnhost-001-site1.ntempurl.com/api/notifications";
+            "http://sportplusklcn10-001-site1.ltempurl.com/api/notifications";
 
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -22,8 +22,7 @@ namespace KhachHang.Services
             _httpClient = httpClient;
         }
 
-        // FIX Bug 3: Tạo request riêng cho từng call,
-        // tránh race condition khi set DefaultRequestHeaders chung.
+     
         private HttpRequestMessage CreateRequest(
             HttpMethod method,
             string url,
@@ -127,8 +126,7 @@ namespace KhachHang.Services
                 $"{BaseUrl}/{notificationId}/read",
                 token);
 
-            // FIX Bug 4: Truyền empty content thay vì null
-            // tránh server trả 415 Unsupported Media Type.
+         
             request.Content = new StringContent(string.Empty);
 
             var response = await _httpClient.SendAsync(request);
@@ -148,7 +146,6 @@ namespace KhachHang.Services
                 $"{BaseUrl}/read-all",
                 token);
 
-            // FIX Bug 4: Truyền empty content thay vì null
             request.Content = new StringContent(string.Empty);
 
             var response = await _httpClient.SendAsync(request);

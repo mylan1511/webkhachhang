@@ -24,7 +24,7 @@
     {
         public int BookingId { get; set; }
 
-        public UserInfo? Customer { get; set; }  // ← đổi UserDto → UserInfo
+        public UserInfo? Customer { get; set; }  
 
         public string? Status { get; set; }
 

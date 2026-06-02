@@ -12,7 +12,7 @@ builder.Services.AddHttpClient<PaymentApiService>();
 builder.Services.AddHttpClient<ProfileApiService>();
 builder.Services.AddHttpClient<PromotionApiService>();
 builder.Services.AddHttpClient<NotificationApiService>();
-builder.Services.AddHttpClient<ServiceApiService>();  // ← đã thêm
+builder.Services.AddHttpClient<ServiceApiService>();  
 
 // HttpClient chung cho TaiKhoanController
 builder.Services.AddHttpClient();
